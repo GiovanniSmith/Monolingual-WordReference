@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+
+  "name": "WordReference Hide Native Definitions",
+  "description": "Hides native definitions in the WordReference.com dictionary for a better monolingual experience",
+  "version": "0.1.0",
+
+  "action": {
+    "default_icon": "WordReferenceLogo.png",
+    "default_popup": "default.html",
+    "persistent": true
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.wordreference.com/*",
+    "http://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.wordreference.com/*", "http://*/*"],
+      "js": ["toggle.js"],
+      "persistent": true
+    }
+  ],
+  "background": {
+    "service_worker": "toggle.js"
+  }
+}
