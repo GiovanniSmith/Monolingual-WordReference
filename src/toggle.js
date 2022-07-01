@@ -70,10 +70,24 @@ var dsense;
 var dsense2 = [];
 var pos2_tooltip;
 var pos2_tooltip_2 = [];
-var languages = ["English", "Spanish"];
+var ph;
+var ph2 = [];
 
 var i = 0;
 var def = "";
+
+try {
+	ph = document.getElementsByClassName("ph");
+    for (i = 0; i < ph.length; i++) {
+    	if (ph[i].innerHTML == "Principal Translations") {
+    		ph[i].innerHTML = "Traducciones Principales";
+    	}
+    }
+}
+catch (exception_var) {
+	console.log("Principal Translations tweak error");
+}
+
 function removeDefinitions() {
 	try {
 		console.log("removeDefinitions()");
@@ -82,10 +96,6 @@ function removeDefinitions() {
     	helperDefinitions = document.getElementsByClassName("To2");
     	dsense = document.getElementsByClassName("dsense");
     	pos2_tooltip = document.getElementsByClassName("POS2 tooltip");
-
-
-
-		//def = definitions[0].innerHTML;
 
         for (i = 0; i < definitions.length; i++) {
         	def = definitions[i].innerHTML;
