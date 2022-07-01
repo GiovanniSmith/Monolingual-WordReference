@@ -1,15 +1,32 @@
 <!doctype html>
 <html>
 <header>
-    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" type="text/css" href="defaultStyles.css" />
     <p1>WordReference Hide Native Definitions</p1>
 </header>
 <body>
-<button id="toggleButton">Toggle</button>
-<br>
-<a href="https://github.com/Giospiral/WordReference-Hide-Native-Definitions/" target="_blank">Github</a>
+<button type="button" id="toggleButton">Toggle</button>
+
+<!-- Rectangular switch
+<label class="switch" id="toggleSwitch">
+    <input type="checkbox">
+    <span class="slider"></span>
+</label>
+ -->
+
 </body>
 <script src="background.js"></script>
 </html>
 <!-- "type": "module" in background -->
 <!-- "https://*://*/*", -->
+<!--
+var evt = new MouseEvent("click", {
+                                  view: window,
+                                  bubbles: true,
+                                  cancelable: true,
+                                  clientX: 20,
+                                  /* whatever properties you want to give it */
+                              });
+          toggleSwitch.dispatchEvent(evt);
+__>
+

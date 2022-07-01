@@ -1,9 +1,4 @@
-/**
-get
-toggle
-invert
-save
-**/
+
 
 document.addEventListener('DOMContentLoaded', function() {
 	console.log('PRESSED');
