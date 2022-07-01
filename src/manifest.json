@@ -23,6 +23,7 @@
     {
       "matches": ["https://www.wordreference.com/*", "http://*/*"],
       "js": ["toggle.js"],
+      "run_at": "document_end",
       "persistent": true
     }
   ],

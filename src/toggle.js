@@ -1,5 +1,5 @@
 var myString = "one";
-
+console.log('toggle.js');
 /**
 chrome.storage.local.set({value: "two"}, function() {
   console.log('Value is set to ' + "two");
