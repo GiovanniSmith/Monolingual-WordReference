@@ -14,7 +14,7 @@ a {
 }
 
 body {
-  background-color: #130F6E;
+  background-color: #5e58c6;
   font-color: black;
 }
 
@@ -23,7 +23,7 @@ button {
   border: 3;
   border-color: white;
   color: white;
-  padding: 15px 55px;
+  padding: 5px 60px;
   text-align: center;
   text-decoration: none;
   display: inline-block;

@@ -2,43 +2,10 @@ console.log('toggle.js');
 var hidden = false;
 var buttons;
 var copyIndex;
-var evenTemp;
 var j;
 var tempArray = [];
 var firstHalf;
 var secondHalf;
-
-try {
-	var nativeExampleSentences = document.getElementsByClassName("FrEx");
-	var FrWrd = document.getElementsByClassName("FrWrd");
-	var even = document.getElementsByClassName("even");
-	buttons = document.getElementsByTagName("td");
-	buttons[9].insertAdjacentHTML('beforeend', "<td><button type=\"button2\" id=\"copyButton\">Copy definitions</button></td>");
-
-	console.log('PRESSED');
-    const sendMessageButton = document.getElementById('copyButton')
-    sendMessageButton.onclick = async function(e) {
-    	console.log(even[0].innerHTML);
-		firstHalf = even[0].innerHTML.split("(")[1];
-		console.log(firstHalf);
-		secondHalf = firstHalf.split(")")[0];
-		console.log(secondHalf);
-
-    	navigator.clipboard.writeText(
-    	RemoveHTMLTags(secondHalf + "\n\n")  +
-    	RemoveHTMLTags(nativeExampleSentences[0].innerHTML)
-    	);
-    }
-}
-catch (err) {
- 	console.log('error for doing stuff');
-}
-
-// https://stackoverflow.com/a/41866980
-function RemoveHTMLTags(html) {
-  var regX = /(<([^>]+)>)/ig;
-  return html.replace(regX, "");
-}
 
 try {// this runs if it's the first time
 	console.log('Check if is first time');
@@ -195,4 +162,39 @@ function restoreDefinitions() {
     catch (exception_var) {
     	console.log("restoreDefinitions() failed");
     }
+}
+
+try {// button stuff
+	var nativeExampleSentences = document.getElementsByClassName("FrEx");
+	var FrWrd = document.getElementsByClassName("FrWrd");
+	var even = document.getElementsByClassName("even");
+	var tableRow = document.getElementsByTagName("tr");
+	var tableData = document.getElementsByTagName("td");
+	var tempCopyToClipboardArray = [];
+	console.log(tableRow);
+	for (let k = 0; k < tableRow.length; k++) {
+		if (tableRow[k].outerHTML.includes("esen:")) {
+			tableRow[k].insertAdjacentHTML('afterend',
+			"<td><button type=\"button2\" id=\"copyButton\">Copy</button></td>");
+			console.log(k);;
+		}
+	}
+	//console.log("sauce: " + tableRow[3].nextSibling.innerHTML);
+	console.log(tableRow[3].innerHTML);
+	const sendMessageButton = document.getElementById('copyButton');
+	sendMessageButton.onclick = async function(e) {
+		navigator.clipboard.writeText((tableRow[3].innerHTML.split("(")[1]).split(")")[0] + "\n\n" +
+		exampleSentences2[0].replace(/<\/?[^>]+(>|$)/g, ""));
+		console.log("Copied to clipboard: " + (tableRow[3].innerHTML.split("(")[1]).split(")")[0] + "\n\n" +
+		exampleSentences2[0]);
+	}
+
+	const hoverCondition = tableRow[3];
+	hoverCondition.onmouseenter = async function(e) {
+		console.log("entered");
+	}
+
+}
+catch (err) {
+ 	console.log(err);
 }
