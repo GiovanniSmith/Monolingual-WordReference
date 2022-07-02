@@ -5,21 +5,45 @@ p1 {
 	font-size: 20px;
 	text-align: center;
 }
+a {
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 10px;
+	text-align: center;
+}
 
 body {
-  background-color: darkblue;
+  background-color: #130F6E;
   font-color: black;
 }
 
-.button {
-  background-color: #4CAF50;
-  border: none;
+button {
+  background-color: #FE902D;
+  border: 3;
+  border-color: white;
   color: white;
-  padding: 15px 32px;
+  padding: 15px 55px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
+  font-family: Cabin
+}
+button:hover {
+  background-color: #ffaa5e;
+  color: white;
+}
+button:active {
+	background-color: #c77123;
+}
+
+button2 {
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 8px;
+  font-family: Cabin
 }
 
 /* ---------------- */

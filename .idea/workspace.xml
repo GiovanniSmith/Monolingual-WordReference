@@ -5,7 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bfede036-dc94-4040-9878-8d5f683f2949" name="Changes" comment="Changed HTML of popup window">
+      <change afterPath="$PROJECT_DIR$/src/WordReference Logo 128x PNG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WordReference Logo 16x PNG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WordReference Logo 1920x PNG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WordReference Logo 48x PNG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WordReference Logo AFF.afphoto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/WordReferenceLogo (old).png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordReferenceLogo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/default.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/default.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/defaultStyles.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/defaultStyles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/practice.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/practice.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/toggle.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/toggle.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -34,17 +45,17 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

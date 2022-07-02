@@ -8,26 +8,20 @@
 <body>
 <br>
 <br>
-<table>
-    <tr>
-        <td class="ToWrd">Mesa</td><td class="Hide">[...]</td>
-    </tr>
-    <tr>
-        <td class="ToWrd">Centro</td>
-    </tr>
-</table>
 <div id="articleWRD">
     <table class="WRD">
         <tr class = "even">
-            <td class = "ToWrd">Mesa</td><td class = "ToWrd2">[...]</td>
-        </tr>
-        <tr>
-            <td onmouseover="this.innerHTML='after';" onmouseout="this.innerHTML='before';">
-                after
-            </td>
+            <td class = "ToWrd">Mesa</td>
         </tr>
     </table>
 </div>
 </body>
 <!--         <td class = "ToWrd2">[...]</td>               -->
 </html>
+<script>
+const para = document.createElement("p");
+const node = document.createTextNode("This is new.");
+para.appendChild(node);
+document.getElementByClassName("even").appendChild(para);
+
+</script>

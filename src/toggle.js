@@ -1,25 +1,44 @@
-var hidden = false;
 console.log('toggle.js');
-/**
-chrome.storage.local.set({value: "two"}, function() {
-  console.log('Value is set to ' + "two");
-});
+var hidden = false;
+var buttons;
+var copyIndex;
+var evenTemp;
+var j;
+var tempArray = [];
+var firstHalf;
+var secondHalf;
 
-chrome.storage.local.get(['value'], function(variable) {
-  console.log('Value currently is ' + variable.value);
-});
+try {
+	var nativeExampleSentences = document.getElementsByClassName("FrEx");
+	var FrWrd = document.getElementsByClassName("FrWrd");
+	var even = document.getElementsByClassName("even");
+	buttons = document.getElementsByTagName("td");
+	buttons[9].insertAdjacentHTML('beforeend', "<td><button type=\"button2\" id=\"copyButton\">Copy definitions</button></td>");
 
-https://developer.chrome.com/docs/extensions/reference/storage/
-**/
+	console.log('PRESSED');
+    const sendMessageButton = document.getElementById('copyButton')
+    sendMessageButton.onclick = async function(e) {
+    	console.log(even[0].innerHTML);
+		firstHalf = even[0].innerHTML.split("(")[1];
+		console.log(firstHalf);
+		secondHalf = firstHalf.split(")")[0];
+		console.log(secondHalf);
 
-/**
-const node = document.createElement("td");
-const textnode = document.createTextNode("Water");
-node.appendChild(textnode);
-node.classList.add("my-class");
-document.getElementById("myList").appendChild(node);
-<td onmouseover="this.innerHTML='after';" onmouseout="this.innerHTML='before';">after</td>
-**/
+    	navigator.clipboard.writeText(
+    	RemoveHTMLTags(secondHalf + "\n\n")  +
+    	RemoveHTMLTags(nativeExampleSentences[0].innerHTML)
+    	);
+    }
+}
+catch (err) {
+ 	console.log('error for doing stuff');
+}
+
+// https://stackoverflow.com/a/41866980
+function RemoveHTMLTags(html) {
+  var regX = /(<([^>]+)>)/ig;
+  return html.replace(regX, "");
+}
 
 try {// this runs if it's the first time
 	console.log('Check if is first time');
@@ -60,18 +79,14 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-var definitions;
+var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh;
 var definitions2 = [];
-var exampleSentences;
 var exampleSentences2 = [];
-var helperDefinitions;
 var helperDefinitions2 = [];
-var dsense;
 var dsense2 = [];
-var pos2_tooltip;
 var pos2_tooltip_2 = [];
-var ph;
 var ph2 = [];
+var dataPh2 = [];
 
 var i = 0;
 var def = "";
@@ -96,7 +111,6 @@ function removeDefinitions() {
     	helperDefinitions = document.getElementsByClassName("To2");
     	dsense = document.getElementsByClassName("dsense");
     	pos2_tooltip = document.getElementsByClassName("POS2 tooltip");
-
         for (i = 0; i < definitions.length; i++) {
         	def = definitions[i].innerHTML;
 			definitions2.push(def);
