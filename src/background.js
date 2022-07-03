@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-	console.log('DOMContentLoaded');
 	const sendMessageButton = document.getElementById('toggleButton');
     sendMessageButton.onclick = async function(e) {
-    	console.log('Definitions toggled');
         let queryOptions = { active: true, currentWindow: true };
         let tab = await chrome.tabs.query(queryOptions);
     	chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
@@ -17,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const sendMessageButton2 = document.getElementById('toggleCopy');
 	sendMessageButton2.onclick = async function(e) {
-		console.log('Definitions toggled');
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {

@@ -6,7 +6,7 @@ var tempArray = [];
 var firstHalf;
 var secondHalf;
 var copyStatus;
-
+console.log("copyStatus4: " + copyStatus);
 try {// this runs if it's the first time
 	console.log('Check if toggle has already been set');
 	chrome.storage.local.get(['value'], function(variable) {
@@ -24,32 +24,36 @@ catch (err) {
 try {// this runs if it's the first time
 	console.log('Check if copy has already been set');
 	chrome.storage.local.get(['copy'], function(variable) {
-      if (variable.copy == null) {
+	console.log('copyStatus11: ' + copyStatus);
+      if (copyStatus == null) {
       	console.log('Nope');
       	chrome.storage.local.set({copy: true}, function() {
 			copyStatus = true;
+			console.log('copyStatus3: ' + copyStatus);
 		});
       }
+    });
+	chrome.storage.local.get(['value'], function(variable) {
+      if (variable.value == "red") {
+    	removeDefinitions();
+      }
+    });
+    chrome.storage.local.get(['copy'], function(variable) {
+      if (variable.copy == false) {
+    	copyStatus = false;
+      }
+      if (variable.copy == true) {
+      	copyStatus = true;
+      }
+      console.log("copyStatus2: " + copyStatus);
     });
 }
 catch (err) {
 	console.log(err);
 }
+console.log('copyStatus10: ' + copyStatus);
 
-chrome.storage.local.get(['value'], function(variable) {
-  if (variable.value == "red") {
-	removeDefinitions();
-  }
-});
-chrome.storage.local.get(['copy'], function(variable) {
-  if (variable.copy == false) {
-	copyStatus = false;
-  }
-  if (variable.copy == true) {
-  	copyStatus = true;
-  }
-  console.log("copyStatus: " + copyStatus);
-});
+
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -83,7 +87,7 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-console.log("copyStatus: " + copyStatus);
+console.log("copyStatus1: " + copyStatus);
 
 var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh;
 var definitions2 = [];
@@ -219,7 +223,14 @@ var buttonVariable;
 var rowStartIndexesCount = 0;
 var strongIndexes = [];
 var strongIndexesCount = 0;
+var nativeExampleSentenceIndexes = [];
+var nativeExampleSentenceIndexesCount;
+var nativeExampleSentenceRowIndexes = [];
+var nativeExampleSentenceRowIndexesCount;
 var tempK = 0;
+var kCount = 0;
+var clipboardArray;
+var tableRowTemporary;
 
 try {// button stuff
 	nativeExampleSentences = document.getElementsByClassName("FrEx");
@@ -230,25 +241,37 @@ try {// button stuff
 	strong = document.getElementsByTagName("strong");
 
 
-	console.log("copyStatus: " + copyStatus);
-	console.log("tableRow: " + tableRow);
+	console.log("copyStatus5: " + copyStatus);
+
 	rowStartIndexes = [];
 	rowDataStartIndexes = [];
 	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
 		if (tableRow[k].outerHTML.includes("esen:")) {
 			rowStartIndexes.push(k);
 		}
+		if (tableRow[k].outerHTML.includes("FrEx")) {// get location of each definition (in bold)
+			nativeExampleSentenceRowIndexes.push(k);
+		} else {
+			nativeExampleSentenceRowIndexes.push(-1);
+		}
 	}
 	console.log("rowStartIndexes:");
 	console.log(rowStartIndexes);
+	console.log("nativeExampleSentenceRowIndexes:");
+    console.log(nativeExampleSentenceRowIndexes);
 	for (let k = 0; k < tableData.length; k++) {
-		if (tableData[k].outerHTML.includes("&nbsp") && !tableData[k].outerHTML.includes("<i>")) {// get location of each blank space
+		if (tableData[k].outerHTML.includes("<td>")) {// get location of each data in row
 			rowDataStartIndexes.push(k);
 		}
 		if (tableData[k].outerHTML.includes("<strong>")) {// get location of each definition (in bold)
 			strongIndexes.push(k);
 		} else {
 			strongIndexes.push(-1);
+		}
+		if (tableData[k].outerHTML.includes("FrEx")) {// get location of each definition (in bold)
+			nativeExampleSentenceIndexes.push(k);
+		} else {
+			nativeExampleSentenceIndexes.push(-1);
 		}
 	}
 	strongIndexes.shift();
@@ -260,11 +283,15 @@ try {// button stuff
 	function notEqualToNegativeOne(value) {
 		return value != -1;
 	}
+	function notEqualToZero(value) {
+		return value != 0;
+	}
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
-	console.log("rowDataStartIndexes:");
-	console.log(rowDataStartIndexes);
-	console.log("strongIndexes:");
-	console.log(strongIndexes);
+	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
+	nativeExampleSentenceIndexes.shift();
+	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
+	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
+
 	//tableData[strongIndexes[0] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + 1 + "\">Copy</button>";
 
 	for (let k = rowStartIndexes[1]; k < tableRow.length; k++) {
@@ -281,9 +308,10 @@ try {// button stuff
 				rowStartIndexesCount++;
 			}
 			if (copyStatus) {
+				//console.log('copyStatus6: ' + copyStatus);
 				if (tableRow[k].outerHTML.includes("esen:")) {// first row
 					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
-					console.log("button created: copyButton" + k);
+					//console.log("button created: copyButton" + k);
 					buttonVariable = document.getElementById("copyButton" + k);
 				}
 				for (let i = k; i < 20; i++) {// second row
@@ -292,13 +320,43 @@ try {// button stuff
 						buttonVariable = "";
 						//console.log("rowStartIndexesCount: " + rowStartIndexesCount);
 						tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
-						console.log("button created: copyButton" + k);
+						//console.log("button created: copyButton" + k);
 						buttonVariable = document.getElementById("copyButton" + k);
 					}
 				}
 			}
-
 			rowStartIndexesCount = 0;
+			const sendMessageButton = document.getElementById('copyButton' + k);
+			sendMessageButton.onclick = async function(e) {
+				tableRowTemporary = tableRow[k-1].innerHTML;
+				console.log("tableRow: " + tableRow);
+				console.log("k: " + k);
+				console.log("rowDataStartIndexes:");
+				console.log(rowDataStartIndexes);
+				console.log("strongIndexes:");
+				console.log(strongIndexes);
+				console.log("nativeExampleSentences: ");
+				console.log(nativeExampleSentences);
+				console.log("nativeExampleSentenceIndexes: ");
+				console.log(nativeExampleSentenceIndexes);
+				console.log("rowStartIndexes: ");
+				console.log(rowStartIndexes);
+				console.log("nativeExampleSentenceRowIndexes: ");
+				console.log(nativeExampleSentenceRowIndexes);
+
+				kCount = k;
+				while (!nativeExampleSentenceRowIndexes.includes(kCount)) {
+					kCount++;
+				}
+
+				clipboardArray = ((tableRowTemporary.split("(")[1]).split(")")[0] + "\n\n");// definition(s)
+				clipboardArray += nativeExampleSentences[nativeExampleSentenceIndexes.indexOf(rowDataStartIndexes[kCount]-1)].innerHTML.replace(/<\/?[^>]+(>|$)/g, "");// example sentence
+				tableRow[k-1].innerHTML = tableRowTemporary;
+
+				navigator.clipboard.writeText(clipboardArray);
+				console.log("Text copied: " + clipboardArray);
+
+			}
 		}
 	}
 
@@ -309,14 +367,7 @@ try {// button stuff
 		}
 	}
 
-	const sendMessageButton = document.getElementById('copyButton3');
-	sendMessageButton.onclick = async function(e) {
-		navigator.clipboard.writeText((tableRow[3].innerHTML.split("(")[1]).split(")")[0] + "\n\n" +
-		exampleSentences2[0].replace(/<\/?[^>]+(>|$)/g, ""));
-		console.log("Copied to clipboard: " + (tableRow[3].innerHTML.split("(")[1]).split(")")[0] + "\n\n" +
-		exampleSentences2[0]);
-		console.log("Copy clicked");
-	}
+
 
 }
 catch (err) {
