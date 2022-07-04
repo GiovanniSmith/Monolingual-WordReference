@@ -6,6 +6,17 @@ var tempArray = [];
 var firstHalf;
 var secondHalf;
 var copyStatus;
+// didn't do ca
+var languageAbbreviations = ["en", "es", "fr", "pt", "it", "de", "nl", "sv", "ru",
+							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];
+var languageCombinations = [];
+for (let i = 0; i < languageAbbreviations.length; i++) {
+	for (let j = 0; j < languageAbbreviations.length; j++) {
+    	languageCombinations.push(languageAbbreviations[i] + languageAbbreviations[j]);
+    }
+}
+
+
 console.log("copyStatus4: " + copyStatus);
 try {// this runs if it's the first time
 	console.log('Check if toggle has already been set');
@@ -213,6 +224,8 @@ var nativeExampleSentences;
 var FrWrd;
 var even;
 var tableRow;
+var tableRowIndexes = [];
+var tableRowIndexesCount;
 var tableData;
 var strong;
 var tempCopyToClipboardArray = [];
@@ -230,6 +243,7 @@ var tempK = 0;
 var kCount = 0;
 var clipboardArray;
 var tableRowTemporary;
+var copyButtonExists = false;
 
 try {// button stuff
 	nativeExampleSentences = document.getElementsByClassName("FrEx");
@@ -253,11 +267,12 @@ try {// button stuff
 		} else {
 			nativeExampleSentenceRowIndexes.push(-1);
 		}
+		if (tableRow[k].outerHTML.includes("<td>")) {
+			tableRowIndexes.push(k);
+		}
 	}
-	console.log("rowStartIndexes:");
-	console.log(rowStartIndexes);
-	console.log("nativeExampleSentenceRowIndexes:");
-    console.log(nativeExampleSentenceRowIndexes);
+	tableRowIndexes.pop();
+	tableRowIndexes.pop();
 	for (let k = 0; k < tableData.length; k++) {
 		if (tableData[k].outerHTML.includes("<td>")) {// get location of each data in row
 			rowDataStartIndexes.push(k);
@@ -291,35 +306,65 @@ try {// button stuff
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
 
+	console.log("tableRowIndexes: " + tableRowIndexes);
+
+	console.log("tableRow: " + tableRow);
+	console.log("tableRow.length: " + tableRow.length);
+	console.log("rowDataStartIndexes:");
+	console.log(rowDataStartIndexes);
+	console.log("rowDataStartIndexes.length:" + rowDataStartIndexes.length);
+	console.log("strongIndexes:");
+	console.log(strongIndexes);
+	console.log("strongIndexes.length: " + strongIndexes.length);
+	console.log("nativeExampleSentences: ");
+	console.log(nativeExampleSentences);
+	console.log("nativeExampleSentences.length: " + nativeExampleSentences.length);
+	console.log("nativeExampleSentenceIndexes: ");
+	console.log(nativeExampleSentenceIndexes);
+	console.log("nativeExampleSentenceIndexes.length: " + nativeExampleSentenceIndexes.length);
+	console.log("rowStartIndexes: ");
+	console.log(rowStartIndexes);
+	console.log("rowStartIndexes.length: " + rowStartIndexes.length);
+	console.log("nativeExampleSentenceRowIndexes: ");
+	console.log(nativeExampleSentenceRowIndexes);
+	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
+
 	//tableData[strongIndexes[0] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + 1 + "\">Copy</button>";
 	// used to be k < tableRow.length
-	for (let k = rowStartIndexes[1]; k < rowStartIndexes[rowStartIndexes.length-1]; k++) {
+	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
 			tempK = k;
 			while (!rowStartIndexes.includes(tempK)) {
 				tempK--;
 				rowStartIndexesCount++;
 			}
-			console.log("copyStatus: " + copyStatus);
+			//console.log("copyStatus: " + copyStatus);
 			if (copyStatus) {
 				console.log(k);
 				if (tableRow[k].outerHTML.includes("esen:")) {// first row
+					console.log("first row");
 					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
 
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
+					copyButtonExists = true;
 				} else
 				{// subsequent rows
-					buttonVariable.outerHTML = "";
-					buttonVariable = "";
-
+					console.log("subsequent row");
+					console.log("copyButtonExists: " + copyButtonExists);
+					if (copyButtonExists) {
+						buttonVariable.outerHTML = "";
+                        buttonVariable = "";
+					}
 					tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
+					copyButtonExists = true;
+
 				}
 
 			}
-
+			console.log("buttonVariable:" + buttonVariable);
 			const sendMessageButton = document.getElementById('copyButton' + k);
 			console.log("sendMessageButton: " + sendMessageButton.innerHTML);
 			sendMessageButton.onclick = async function(e) {
@@ -350,10 +395,11 @@ try {// button stuff
 				while (!nativeExampleSentenceRowIndexes.includes(kCount)) {
 					kCount++;
 				}
-
+				console.log("rowDataStartIndexes[kCount]-1: ");
+				console.log(rowDataStartIndexes[kCount]-1);
 				var rowDataStartIndexeskCountVariable;
-				clipboardArray = ((tableRowTemporary.split("(")[1]).split(")")[0] + "\n\n");// definition(s)
-				//clipboardArray += nativeExampleSentences[nativeExampleSentenceIndexes.indexOf(rowDataStartIndexes[kCount]-1)].innerHTML.replace(/<\/?[^>]+(>|$)/g, "");// example sentence
+				clipboardArray = ((tableRowTemporary.split("(")[1]).split(")")[0]);// definition(s)
+				clipboardArray += "\n\n" + nativeExampleSentences[nativeExampleSentenceIndexes.indexOf(rowDataStartIndexes[kCount]-1)].innerHTML.replace(/<\/?[^>]+(>|$)/g, "");
 				tableRow[k-1].innerHTML = tableRowTemporary;
 
 				navigator.clipboard.writeText(clipboardArray);
@@ -363,7 +409,7 @@ try {// button stuff
 		}
 	}
 
-	for (let m = rowStartIndexes[1]; m < rowStartIndexes[rowStartIndexes.length-1]; m++) {
+	for (let m = rowStartIndexes[1]; m <= tableRowIndexes[tableRowIndexes.length-1]; m++) {
 		tableRow[m].onmouseleave = async function(e) {
 			buttonVariable.outerHTML = "";
             buttonVariable = "";

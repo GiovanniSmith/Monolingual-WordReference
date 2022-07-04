@@ -26,9 +26,10 @@ button {
   padding: 5px 60px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
+  display: inline;
   font-size: 16px;
-  font-family: Cabin
+  font-family: Cabin;
+  cursor: pointer;
 }
 button:hover {
   background-color: #ffaa5e;

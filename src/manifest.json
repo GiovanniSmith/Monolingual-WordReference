@@ -21,11 +21,12 @@
     "storage"
   ],
   "host_permissions": [
-    "https://www.wordreference.com/*/*/*"
+    "https://www.wordreference.com/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.wordreference.com/*/*/*"],
+      "matches": [
+        "https://www.wordreference.com/*"],
       "js": ["toggle.js"],
       "css": ["pageStyles.css"],
       "run_at": "document_end",
