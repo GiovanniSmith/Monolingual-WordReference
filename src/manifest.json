@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
 
-  "name": "WordReference Hide Native Definitions",
-  "description": "Hides native definitions in the WordReference.com dictionary for a better monolingual experience",
+  "name": "WordReference Tweak",
+  "description": "Additional features to WordReference",
   "version": "0.1.0",
   "icons": {
     "16": "WordReference Logo 16x PNG.png",

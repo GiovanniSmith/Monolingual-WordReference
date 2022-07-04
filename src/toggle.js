@@ -218,7 +218,6 @@ var strong;
 var tempCopyToClipboardArray = [];
 var rowStartIndexes = [];
 var rowDataStartIndexes = [];
-var rowDataOffset = 3;
 var buttonVariable;
 var rowStartIndexesCount = 0;
 var strongIndexes = [];
@@ -293,64 +292,68 @@ try {// button stuff
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
 
 	//tableData[strongIndexes[0] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + 1 + "\">Copy</button>";
-
-	for (let k = rowStartIndexes[1]; k < tableRow.length; k++) {
+	// used to be k < tableRow.length
+	for (let k = rowStartIndexes[1]; k < rowStartIndexes[rowStartIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
-			if (tableRow[k].outerHTML.includes("dsense")) {
-				rowDataOffset = 4;
-			} else {
-				rowDataOffset = 3;
-			}
-			//console.log(k);
 			tempK = k;
 			while (!rowStartIndexes.includes(tempK)) {
 				tempK--;
 				rowStartIndexesCount++;
 			}
+			console.log("copyStatus: " + copyStatus);
 			if (copyStatus) {
-				//console.log('copyStatus6: ' + copyStatus);
+				console.log(k);
 				if (tableRow[k].outerHTML.includes("esen:")) {// first row
 					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
-					//console.log("button created: copyButton" + k);
+
 					buttonVariable = document.getElementById("copyButton" + k);
+					rowStartIndexesCount = 0;
+				} else
+				{// subsequent rows
+					buttonVariable.outerHTML = "";
+					buttonVariable = "";
+
+					tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
+					buttonVariable = document.getElementById("copyButton" + k);
+					rowStartIndexesCount = 0;
 				}
-				for (let i = k; i < 20; i++) {// second row
-					if (!rowStartIndexes.includes(k+rowStartIndexesCount)) {
-						buttonVariable.outerHTML = "";
-						buttonVariable = "";
-						//console.log("rowStartIndexesCount: " + rowStartIndexesCount);
-						tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + k + "\">Copy</button>";
-						//console.log("button created: copyButton" + k);
-						buttonVariable = document.getElementById("copyButton" + k);
-					}
-				}
+
 			}
-			rowStartIndexesCount = 0;
+
 			const sendMessageButton = document.getElementById('copyButton' + k);
+			console.log("sendMessageButton: " + sendMessageButton.innerHTML);
 			sendMessageButton.onclick = async function(e) {
 				tableRowTemporary = tableRow[k-1].innerHTML;
+				console.log("-----------------------------------------------------------------");
 				console.log("tableRow: " + tableRow);
-				console.log("k: " + k);
+				console.log("tableRow.length: " + tableRow.length);
 				console.log("rowDataStartIndexes:");
 				console.log(rowDataStartIndexes);
+				console.log("rowDataStartIndexes.length:" + rowDataStartIndexes.length);
 				console.log("strongIndexes:");
 				console.log(strongIndexes);
+				console.log("strongIndexes.length: " + strongIndexes.length);
 				console.log("nativeExampleSentences: ");
 				console.log(nativeExampleSentences);
+				console.log("nativeExampleSentences.length: " + nativeExampleSentences.length);
 				console.log("nativeExampleSentenceIndexes: ");
 				console.log(nativeExampleSentenceIndexes);
+				console.log("nativeExampleSentenceIndexes.length: " + nativeExampleSentenceIndexes.length);
 				console.log("rowStartIndexes: ");
 				console.log(rowStartIndexes);
+				console.log("rowStartIndexes.length: " + rowStartIndexes.length);
 				console.log("nativeExampleSentenceRowIndexes: ");
 				console.log(nativeExampleSentenceRowIndexes);
+				console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
 
 				kCount = k;
 				while (!nativeExampleSentenceRowIndexes.includes(kCount)) {
 					kCount++;
 				}
 
+				var rowDataStartIndexeskCountVariable;
 				clipboardArray = ((tableRowTemporary.split("(")[1]).split(")")[0] + "\n\n");// definition(s)
-				clipboardArray += nativeExampleSentences[nativeExampleSentenceIndexes.indexOf(rowDataStartIndexes[kCount]-1)].innerHTML.replace(/<\/?[^>]+(>|$)/g, "");// example sentence
+				//clipboardArray += nativeExampleSentences[nativeExampleSentenceIndexes.indexOf(rowDataStartIndexes[kCount]-1)].innerHTML.replace(/<\/?[^>]+(>|$)/g, "");// example sentence
 				tableRow[k-1].innerHTML = tableRowTemporary;
 
 				navigator.clipboard.writeText(clipboardArray);
@@ -360,15 +363,12 @@ try {// button stuff
 		}
 	}
 
-	for (let m = rowStartIndexes[1]; m < tableRow.length; m++) {
+	for (let m = rowStartIndexes[1]; m < rowStartIndexes[rowStartIndexes.length-1]; m++) {
 		tableRow[m].onmouseleave = async function(e) {
 			buttonVariable.outerHTML = "";
             buttonVariable = "";
 		}
 	}
-
-
-
 }
 catch (err) {
  	console.log(err);
