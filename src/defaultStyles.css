@@ -22,7 +22,7 @@ button {
   background-color: #FE902D;
   border: 3;
   border-color: white;
-  color: black;
+  color: white;
   padding: 5px 60px;
   text-align: center;
   text-decoration: none;
@@ -33,7 +33,6 @@ button {
 }
 button:hover {
   background-color: #ffaa5e;
-  color: black;
 }
 button:active {
 	background-color: #c77123;
