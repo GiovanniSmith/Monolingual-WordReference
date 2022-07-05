@@ -20,7 +20,7 @@
   text-decoration: none;
   display: inline-block;
   font-size: 5px;
-  font-family: Cabin
+  font-family: Cabin;
 }
 .button2:hover {
   background-color: #6E67E5;

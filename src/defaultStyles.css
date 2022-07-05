@@ -2,8 +2,9 @@ p1 {
     color: white;
 	font-weight: bold;
 	font-family: Cabin;
-	font-size: 20px;
+	font-size: 23.2px;
 	text-align: center;
+	user-select: none;
 }
 a {
     color: white;
@@ -11,6 +12,7 @@ a {
 	font-family: Cabin;
 	font-size: 10px;
 	text-align: center;
+	user-select: none;
 }
 
 body {
@@ -23,10 +25,7 @@ button {
   border: 3;
   border-color: white;
   color: white;
-  padding: 5px 60px;
-  text-align: center;
-  text-decoration: none;
-  display: inline;
+  padding: 5px 75px;
   font-size: 16px;
   font-family: Cabin;
   cursor: pointer;
@@ -35,26 +34,5 @@ button:hover {
   background-color: #ffaa5e;
 }
 button:active {
-	background-color: #c77123;
-}
-
-
-button3 {
-  background-color: #FE902D;
-  border: 3;
-  border-color: white;
-  color: white;
-  padding: 5px 60px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  font-family: Cabin
-}
-button3:hover {
-  background-color: #ffaa5e;
-  color: white;
-}
-button3:active {
 	background-color: #c77123;
 }
