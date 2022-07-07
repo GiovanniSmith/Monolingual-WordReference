@@ -25,6 +25,7 @@ var buttonVariable;
 var rowStartIndexesCount = 0;
 var strongIndexes = [];
 var strongIndexesCount = 0;
+var strongRowIndexes = [];
 var nativeExampleSentenceIndexes = [];
 var nativeExampleSentenceIndexesCount;
 var nativeExampleSentenceRowIndexes = [];
@@ -62,9 +63,39 @@ var doesSecondOpenParenthesisExist = false;
 var noExampleSentenceForDefinition = false;
 var deleteThisLater = 3;
 var keybindPressed = false;
+var kCountUntilNativeExampleSentenceFound;
+var newRowVariable;
+var countNewRows = 0;
+var countNewRowsSentence = 0;
+var modifiedRows = [];
+
+
+var addOneRowToSingleRowDefinitions = true;// very important, it's basically a setting
+
 
 function createCopyButton(index) {
-	return "<button class=\"button2\" id=\"copyButton" + index + "\">Copy</button>";
+	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
+}
+function createNewRow(index) {
+	return "<tr id=\"newRow" + index + "\"><td></td><td></td><td></td></tr>";
+}
+function notEqualToNegativeOne(num) {
+	return num != -1;
+}
+function notEqualToZero(num) {
+	return num != 0;
+}
+function areIntegersAreInOrder(array) {
+	// [1 3 4] = true, [2 1 4] = false
+	var returnThis = true;
+	for (let i = 0; i < array.length-1; i++) {
+		if (!(array[i+1] > array[i])) {
+			returnThis = false;
+			console.log("areIntegersAreInOrder: problem is at index: " + i + ", value: " + array[i]);
+			break;
+		}
+	}
+	return returnThis;
 }
 
 for (let i = 0; i < languageAbbreviations.length; i++) {
@@ -262,16 +293,7 @@ function insertCopyButton() {
 
 // button stuff
 try {// button stuff
-	rowStartIndexes = [];
-	rowDataStartIndexes = [];
-	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
-		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
-        	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
-				rowStartIndexes.push(k);
-				languageCombinationInPage = languageCombinations[i];
-				break;
-			}
-        }
+	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {// get location of each definition (in bold)
 			nativeExampleSentenceRowIndexes.push(k);
 		} else {
@@ -280,13 +302,55 @@ try {// button stuff
 		if (tableRow[k].outerHTML.includes("<td>")) {
 			tableRowIndexes.push(k);
 		}
+		if (tableRow[k].outerHTML.includes("<strong>") && tableRow[k].outerHTML.includes("FrWrd")) {
+			strongRowIndexes.push(k);
+		}
 		if (tableRow[k].outerHTML.includes("Additional Translations") || tableRow[k].outerHTML.includes("Compound Forms")) {
 			headerRowIndexes.push(k);
 		}
 	}
-	tableRowIndexes.pop();
-	tableRowIndexes.pop();
-	headerRowIndexes.shift();
+	strongRowIndexes.shift();
+	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
+    nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
+    console.log("strongRowIndexes: " + strongRowIndexes);
+    console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
+	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
+		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
+        	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
+				rowStartIndexes.push(k);
+				languageCombinationInPage = languageCombinations[i];
+
+				if (addOneRowToSingleRowDefinitions) {
+					if (countNewRows < strongRowIndexes[strongRowIndexes.length-1]) {
+						console.log("1 def:  " + strongRowIndexes[countNewRows]);
+						console.log("2 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+						//console.log("3: " + nativeExampleSentenceRowIndexes[countNewRowsSentence+1]);
+						console.log("3 def:  " + strongRowIndexes[countNewRows+1]);
+
+						if (areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
+							nativeExampleSentenceRowIndexes[countNewRowsSentence+1], strongRowIndexes[countNewRows+1]])) {
+							countNewRowsSentence++;
+							console.log("Definition has two foreign example sentences.");
+						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], strongRowIndexes[countNewRows+1],
+                                   	nativeExampleSentenceRowIndexes[countNewRowsSentence]])) {
+							countNewRowsSentence--;
+                            console.log("Two definitions with no example sentence between them.");
+						}
+						else if (!areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
+							strongRowIndexes[countNewRows+1]])) {
+							modifiedRows.push(rowStartIndexes[countNewRows]);
+							tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
+						}
+
+					}
+					countNewRows++;
+					countNewRowsSentence++;
+				}
+
+			}
+        }
+	}
+
 
 	for (i = 0; i < ph.length; i++) {
 		if(languageCombinationInPage == "esen:") {
@@ -314,7 +378,7 @@ try {// button stuff
 				ph[i].innerHTML = "Compound Forms";
 			}
 		}
-	}
+	}// header change
 
 	for (let k = 0; k < tableData.length; k++) {
 		if (tableData[k].outerHTML.includes("<td>")) {// get location of each data in row
@@ -325,31 +389,32 @@ try {// button stuff
 		} else {
 			strongIndexes.push(-1);
 		}
-		if (tableData[k].outerHTML.includes("FrEx")) {// get location of each definition (in bold)
+		if (tableData[k].outerHTML.includes("FrEx")) {
 			nativeExampleSentenceIndexes.push(k);
 		} else {
 			nativeExampleSentenceIndexes.push(-1);
 		}
 	}
+	tableRowIndexes.pop();
+	tableRowIndexes.pop();
+	headerRowIndexes.shift();
 	strongIndexes.shift();
 	strongIndexes.shift();
 	strongIndexes.shift();
 	while (strongIndexes[0] == -1) {
 		strongIndexes.shift();
 	}
-	function notEqualToNegativeOne(num) {
-		return num != -1;
-	}
-	function notEqualToZero(num) {
-		return num != 0;
-	}
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes.shift();
-	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
-	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
 
+	console.log("--------");
+	console.log("strongRowIndexes: " + strongRowIndexes);
+	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
+	// tableRow[rowStartIndexes[rowStartIndexes.indexOf(3)]].insertAdjacentHTML('afterend', '<tr><td></td><td></td><td></td></tr>');
+	console.log("--------");
 
+	console.log("modified rows: " + modifiedRows);
 	console.log("tableRowIndexes: " + tableRowIndexes);
 	console.log("tableRow: " + tableRow);
 	console.log("tableRow.length: " + tableRow.length);
@@ -374,6 +439,20 @@ try {// button stuff
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
 
+	// if there doesn't exist a foreign example sentence between two definitions,
+	// create a new row on which to put the button
+	// tableRow[rowStartIndexes[rowStartIndexes.indexOf(k)]].insertAdjacentHTML('afterend', createNewRow(k));
+	// if strongRowIndexes has nativeExampleSentenceRowIndexes greater than it and nativeExampleSentenceRowIndexes is less than strongRowIndexes[] + 1
+	/**
+	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
+		for (let c = 0; c < strongRowIndexes.length; c++) {
+			if (strongRowIndexes[k] < nativeExampleSentenceRowIndexes[c] && strongRowIndexes[k+1] > nativeExampleSentenceRowIndexes[c]) {
+				tableRow[rowStartIndexes[rowStartIndexes.indexOf(k)]].insertAdjacentHTML('afterend', createNewRow(k));
+				break;
+			}
+		}
+	}**/
+	//tableRow[rowStartIndexes[rowStartIndexes.indexOf(3)]].insertAdjacentHTML('afterend', createNewRow(k));
 
 	//tableData[strongIndexes[0] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + 1 + "\">Copy</button>";
 	// used to be k < tableRow.length
@@ -390,7 +469,6 @@ try {// button stuff
 			&& !tableRow[k].outerHTML.includes("Compound Forms")
 			&& !tableRow[k].outerHTML.includes("langHeader")) {
 
-				console.log(k);
 				for (let p = 0; p < headerRowIndexes.length; p++) {// account for going past bold headers
 					if (k > headerRowIndexes[p]) {
 						headerRowOffsetCount = p+1;
@@ -400,7 +478,7 @@ try {// button stuff
 				}
 
 				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {// first row of definition
-					//console.log("first row");
+					console.log("First row: " + k);
 					onFirstRow = true;
 					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k);
 
@@ -408,7 +486,7 @@ try {// button stuff
 					rowStartIndexesCount = 0;
 					copyButtonExists = true;
 				} else {// subsequent rows of definition
-					//console.log("subsequent row");
+					console.log("Subsequent row: " + k);
 					onFirstRow = false;
 					//console.log("copyButtonExists: " + copyButtonExists);
 					if (copyButtonExists) {
@@ -501,6 +579,7 @@ try {// button stuff
             buttonVariable = "";
 		}
 	}
+
 }
 catch (err) {
  	console.log(err);

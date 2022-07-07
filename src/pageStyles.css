@@ -10,7 +10,7 @@
 }
 **/
 
-.button2 {
+.blueButton {
   background-color: #5e58c7;
   border: 3;
   border-color: white;
@@ -22,10 +22,10 @@
   font-size: 5px;
   font-family: Cabin;
 }
-.button2:hover {
+.blueButton:hover {
   background-color: #6E67E5;
   color: white;
 }
-.button2:active {
+.blueButton:active {
 	background-color: #393577;
 }
