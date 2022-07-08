@@ -1,11 +1,10 @@
-var hidden = false;
 var buttons;
 var copyIndex;
 var j;
 var tempArray = [];
 var firstHalf;
 var secondHalf;
-var copyStatus;
+var copyStatus = false;
 // didn't do ca
 var languageAbbreviations = ["en", "es", "fr", "pt", "it", "de", "nl", "sv", "ru",
 							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];
@@ -30,6 +29,8 @@ var nativeExampleSentenceIndexes = [];
 var nativeExampleSentenceIndexesCount;
 var nativeExampleSentenceRowIndexes = [];
 var nativeExampleSentenceRowIndexesCount;
+var notePublRowIndexes = [];
+var notePublRowTouchingStrongIndexes = [];
 var tempK = 0;
 var kCount = 0;
 var clipboardArray;
@@ -44,7 +45,7 @@ var headerRowOffsetCount = 0;
 var findNativeExampleSentenceCounter;
 var clipboardSingleElement;
 var clipboardArrayWithHTML;
-var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh;
+var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh, notePubl;
 var definitions2 = [];
 var exampleSentences2 = [];
 var helperDefinitions2 = [];
@@ -67,11 +68,12 @@ var kCountUntilNativeExampleSentenceFound;
 var newRowVariable;
 var countNewRows = 0;
 var countNewRowsSentence = 0;
+var countNewRowsNotes = 0;
 var modifiedRows = [];
+var htmlThatButtonRemoved = "";
+var currentRowTheCopyButtonIsOn;
 
-
-var addOneRowToSingleRowDefinitions = true;// very important, it's basically a setting
-
+var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
@@ -86,118 +88,76 @@ function notEqualToZero(num) {
 	return num != 0;
 }
 function areIntegersAreInOrder(array) {
-	// [1 3 4] = true, [2 1 4] = false
 	var returnThis = true;
 	for (let i = 0; i < array.length-1; i++) {
-		if (!(array[i+1] > array[i])) {
+		if(array[i+1] == null) {
+			console.log("areIntegersAreInOrder: index is null: " + i+1);
+		} else if (!(array[i+1] > array[i])) {
 			returnThis = false;
-			console.log("areIntegersAreInOrder: problem is at index: " + i + ", value: " + array[i]);
 			break;
 		}
 	}
 	return returnThis;
 }
-
+// get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
 for (let i = 0; i < languageAbbreviations.length; i++) {
 	for (let j = 0; j < languageAbbreviations.length; j++) {
     	languageCombinations.push(languageAbbreviations[i] + languageAbbreviations[j] + ":");
     }
 }
-chrome.storage.local.get(['value', 'copy', 'checkbox1', 'checkbox2'], function(variable) {
-  if (variable.value == null) {
-	chrome.storage.local.set({value: "green"}, function() {});
-  }
-  if (variable.copy == null) {
-  	chrome.storage.local.set({copy: true}, function() {});
-  }
-  if (variable.checkbox1 == null) {
-	chrome.storage.local.set({checkbox1: true}, function() {});
-  }
-  if (variable.checkbox2 == null) {
-  	chrome.storage.local.set({checkbox2: true}, function() {});
-  }
-});
+// have the status of toggleDefinitions and toggleCopy change when the respective button is clicked
+chrome.storage.local.get(['toggleDefinitions', 'toggleCopy'], function(variable) {
+	if (variable.toggleDefinitions == null) {
+		chrome.storage.local.set({toggleDefinitions: false}, function() {});
+		console.log("variable.toggleDefinitions was null, now it's: " + variable.toggleDefinitions);
+		restoreDefinitions();
+	} else if (variable.toggleDefinitions == true) {
+		chrome.storage.local.set({toggleDefinitions: true}, function() {});
+		console.log("variable.toggleDefinition: " + variable.toggleDefinitions);
+		//restoreDefinitions();
+	} else if (variable.toggleDefinitions == false) {
+		chrome.storage.local.set({toggleDefinitions: false}, function() {});
+		console.log("variable.toggleDefinition: " + variable.toggleDefinitions);
+		removeDefinitions();
+	}
 
+	if (variable.toggleCopy == null) {
+		chrome.storage.local.set({toggleCopy: false}, function() {});
+		console.log("variable.toggleCopy used to be null, now it's: " + variable.toggleCopy);
+		copyStatus = true;
+	} else if (variable.toggleCopy == true) {
+		chrome.storage.local.set({toggleCopy: true}, function() {});
+		console.log("variable.toggleCopy: " + variable.toggleCopy);
+		copyStatus = false;
+	} else if (variable.toggleCopy == false) {
+		chrome.storage.local.set({toggleCopy: false}, function() {});
+		console.log("variable.toggleCopy: " + variable.toggleCopy);
+		copyStatus = true;
+	}
+});
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
-      if (request.key === "green") {
-        removeDefinitions();
-        chrome.storage.local.set({value: "red"}, function() {
-
-        });
-      } else if (request.key === "red") {
-	    restoreDefinitions();
-	    chrome.storage.local.set({value: "green"}, function() {
-
-		});
-	  }
-	  if (request.copyKey === true) {
-		  copyStatus = true;
-		  chrome.storage.local.set({copy: false}, function() {
-
-		  });
-	  } else if (request.copyKey === false) {
-		  copyStatus = false;
-		  chrome.storage.local.set({copy: true}, function() {
-
-		  });
-	  }
-	  if (request.checkbox1Key === true) {
-		  checkbox1Enabled = true;
-		  chrome.storage.local.set({checkbox1: false}, function() {
-
-		  });
-	  } else if (request.checkbox1Key === false) {
-		  checkbox1Enabled = false;
-		  chrome.storage.local.set({checkbox1: true}, function() {
-
-		  });
-	  }
-	  if (request.checkbox2Key === true) {
-		  checkbox2Enabled = true;
-		  chrome.storage.local.set({checkbox2: false}, function() {
-
-		  });
-	  } else if (request.checkbox2Key === false) {
-		  checkbox2Enabled = false;
-		  chrome.storage.local.set({checkbox2: true}, function() {
-
-		  });
+      if (request.toggleDefinitionsKey == true) {
+      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
+      	removeDefinitions();
+      } else if (request.toggleDefinitionsKey == false) {
+      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
+      	restoreDefinitions();
+      }
+	  if (request.toggleCopyKey == true) {
+	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
+	  	copyStatus = true;
+	  	console.log("copyStatus: " + copyStatus);
+	  } else if (request.toggleCopyKey == false) {
+	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
+	  	copyStatus = false;
+	  	console.log("copyStatus: " + copyStatus);
 	  }
     }
 );
 
-try {
-	chrome.storage.local.get(['value', 'copy', 'checkbox1', 'checkbox2'], function(variable) {
-      if (variable.value == "red") {
-    	removeDefinitions();
-      }
-      if (variable.copy == false) {
-		copyStatus = true;
-	  }
-	  if (variable.checkbox1 == false) {
-		checkbox1Enabled = true;
-	  }
-	  if (variable.checkbox2 == false) {
-		checkbox2Enabled = true;
-	  }
-    });
-}
-catch (err) {
-	console.log(err);
-	console.log("ERROR-----------");
-}
-
 
 try {
-
-}
-catch (exception_var) {
-	console.log("Principal Translations tweak error");
-
-}
-
-try {// declare stuff
 	definitions = document.getElementsByClassName('ToWrd');
 	exampleSentences = document.getElementsByClassName("ToEx");
 	helperDefinitions = document.getElementsByClassName("To2");
@@ -210,37 +170,47 @@ try {// declare stuff
 	tableData = document.getElementsByTagName("td");
 	strong = document.getElementsByTagName("strong");
 	ph = document.getElementsByClassName("ph");
+	notePubl = document.getElementsByClassName("notePubl");
 }
 catch (exception_var) {
 	console.log(exception_var);
-
 }
 
+// fill up the second array beforehand to ensure that later on, the first array doesn't draw from an empty array
+try {
+	for (i = 0; i < definitions.length; i++) {
+		definitions2.push(definitions[i].innerHTML);
+	}
+	for (i = 0; i < exampleSentences.length; i++) {
+		exampleSentences2.push(exampleSentences[i].innerHTML);
+	}
+	for (i = 0; i < pos2_tooltip.length; i++) {
+		pos2_tooltip_2.push(pos2_tooltip[i].innerHTML);
+	}
+	for (i = 0; i < dsense.length; i++) {
+		dsense2.push(dsense[i].innerHTML);
+	}
+}
+catch (exception_var) {
+	console.log(exception_var);
+}
+// hides some html elements to either [...] or a blank
 function removeDefinitions() {
 	try {
-		// .replace(/<\/?[^>]+(>|$)/g, "")
-        for (i = 0; i < definitions.length; i++) {// i is 1 so that it doesn't replace the column name text (at least on the first row)
-        	def = definitions[i].innerHTML;
-			definitions2.push(def);
-			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + def + "';");
+        for (i = 0; i < definitions.length; i++) {
+			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions[i].innerHTML + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
         	definitions[i].innerHTML = "[...]";
         }
         for (i = 0; i < exampleSentences.length; i++) {
-        	def = exampleSentences[i].innerHTML;
-            exampleSentences2.push(def);
-			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + def + "';");
+			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + exampleSentences[i].innerHTML + "';");
 			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
 			exampleSentences[i].innerHTML = "[...]";
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
-			def = pos2_tooltip[i].innerHTML;
-			pos2_tooltip_2.push(def);
 			pos2_tooltip[i].innerHTML = "";
 		}
 		for (i = 0; i < dsense.length; i++) {
-			def = dsense[i].innerHTML;
-			dsense2.push(def);
 			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + def + "';");
 			dsense[i].setAttribute("onmouseleave", "this.innerHTML=''");
 			dsense[i].setAttribute("style", "text-align:right");
@@ -249,16 +219,15 @@ function removeDefinitions() {
 
 		console.log("removed definitions: " + definitions.length + ", removed exampleSentences: " + exampleSentences.length +
 					", removed pos2_tooltip: " + pos2_tooltip.length + ", removed dsense: " + dsense.length);
-		hidden = true;
     }
     catch (exception_var) {
     	console.log("removeDefinitions() failed");
     }
 }
-
+// restores some html elements to their original text after they have been hidden
 function restoreDefinitions() {
 	try {
-        for (i = 1; i < definitions.length; i++) {// i is 1 so that it doesn't replace the column name text (at least on the first row)
+        for (i = 0; i < definitions.length; i++) {// i is 1 so that it doesn't replace the column name text (at least on the first row)
         	definitions[i].innerHTML = definitions2[i];
         	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions2[i] + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + definitions2[i] + "';");
@@ -280,21 +249,16 @@ function restoreDefinitions() {
 		}
 		console.log("restored definitions: " + definitions2.length + ", removed restored: " + exampleSentences2.length +
         					", restored pos2_tooltip: " + pos2_tooltip_2.length + ", restored dsense: " + dsense2.length);
-		hidden = false;
     }
     catch (exception_var) {
     	console.log("restoreDefinitions() failed");
     }
 }
 
-function insertCopyButton() {
-	alert("insertCopyButton");
-}
-
 // button stuff
-try {// button stuff
+try {
 	for (let k = 0; k < tableRow.length; k++) {
-		if (tableRow[k].outerHTML.includes("FrEx")) {// get location of each definition (in bold)
+		if (tableRow[k].outerHTML.includes("FrEx")) {
 			nativeExampleSentenceRowIndexes.push(k);
 		} else {
 			nativeExampleSentenceRowIndexes.push(-1);
@@ -308,12 +272,22 @@ try {// button stuff
 		if (tableRow[k].outerHTML.includes("Additional Translations") || tableRow[k].outerHTML.includes("Compound Forms")) {
 			headerRowIndexes.push(k);
 		}
+		if (tableRow[k].outerHTML.includes("notePubl")) {
+			notePublRowIndexes.push(k);
+			if (strongRowIndexes.includes(k - 1)) {
+				notePublRowTouchingStrongIndexes.push(k);
+			}
+		}
 	}
 	strongRowIndexes.shift();
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
     nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
+    notePublRowIndexes.shift();
+
     console.log("strongRowIndexes: " + strongRowIndexes);
     console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
+    console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
+    console.log("notePublRowIndexes: " + notePublRowIndexes);
 	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
 		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
         	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
@@ -322,24 +296,61 @@ try {// button stuff
 
 				if (addOneRowToSingleRowDefinitions) {
 					if (countNewRows < strongRowIndexes[strongRowIndexes.length-1]) {
-						console.log("1 def:  " + strongRowIndexes[countNewRows]);
-						console.log("2 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
-						//console.log("3: " + nativeExampleSentenceRowIndexes[countNewRowsSentence+1]);
-						console.log("3 def:  " + strongRowIndexes[countNewRows+1]);
 
-						if (areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
+						if (areIntegersAreInOrder([strongRowIndexes[countNewRows], notePublRowTouchingStrongIndexes[countNewRowsNotes],
+							nativeExampleSentenceRowIndexes[countNewRowsSentence],
 							nativeExampleSentenceRowIndexes[countNewRowsSentence+1], strongRowIndexes[countNewRows+1]])) {
+							console.log("Definition has two foreign example sentences, and contains note that is one row under definition.");
+							console.log("1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("2 not:  " + notePublRowTouchingStrongIndexes[countNewRowsNotes]);
+							console.log("3 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+							console.log("4 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence+1]);
+							console.log("5 def:  " + strongRowIndexes[countNewRows+1]);
+							console.log("modified row: ");
 							countNewRowsSentence++;
-							console.log("Definition has two foreign example sentences.");
+							countNewRowsNotes++;
+							modifiedRows.push(rowStartIndexes[countNewRows]);
+                            tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
+						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], notePublRowTouchingStrongIndexes[countNewRowsNotes],
+							nativeExampleSentenceRowIndexes[countNewRowsSentence], strongRowIndexes[countNewRows+1]])) {
+							console.log("Definition has one foreign example sentence, and contains note that is one row under definition.");
+							console.log("1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("2 not:  " + notePublRowTouchingStrongIndexes[countNewRowsNotes]);
+							console.log("3 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+							console.log("4 def:  " + strongRowIndexes[countNewRows+1]);
+
+							modifiedRows.push(rowStartIndexes[countNewRows]);
+                            tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
+						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
+							nativeExampleSentenceRowIndexes[countNewRowsSentence+1], strongRowIndexes[countNewRows+1]])) {
+							console.log("Definition has two foreign example sentences. Does it contain a note?");
+							console.log("1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("2 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+							console.log("3 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence+1]);
+							console.log("4 def:  " + strongRowIndexes[countNewRows+1]);
+							countNewRowsSentence++;
+
 						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], strongRowIndexes[countNewRows+1],
-                                   	nativeExampleSentenceRowIndexes[countNewRowsSentence]])) {
+                            nativeExampleSentenceRowIndexes[countNewRowsSentence]])) {
+							console.log("Two definitions with no example sentence between them.");
+							console.log("1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("2 def:  " + strongRowIndexes[countNewRows+1]);
+							console.log("3 nat:  " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
 							countNewRowsSentence--;
-                            console.log("Two definitions with no example sentence between them.");
+
 						}
 						else if (!areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
 							strongRowIndexes[countNewRows+1]])) {
+							console.log("1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("2 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+							console.log("3 def:  " + strongRowIndexes[countNewRows+1]);
 							modifiedRows.push(rowStartIndexes[countNewRows]);
 							tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
+						} else {
+							console.log("Normal order. countNewRows: " + countNewRows);
+							console.log("Normal - 1 def:  " + strongRowIndexes[countNewRows]);
+							console.log("Normal - 2 sent: " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
+							console.log("Normal - 3 def:  " + strongRowIndexes[countNewRows+1]);
 						}
 
 					}
@@ -438,24 +449,6 @@ try {// button stuff
 	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
-
-	// if there doesn't exist a foreign example sentence between two definitions,
-	// create a new row on which to put the button
-	// tableRow[rowStartIndexes[rowStartIndexes.indexOf(k)]].insertAdjacentHTML('afterend', createNewRow(k));
-	// if strongRowIndexes has nativeExampleSentenceRowIndexes greater than it and nativeExampleSentenceRowIndexes is less than strongRowIndexes[] + 1
-	/**
-	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
-		for (let c = 0; c < strongRowIndexes.length; c++) {
-			if (strongRowIndexes[k] < nativeExampleSentenceRowIndexes[c] && strongRowIndexes[k+1] > nativeExampleSentenceRowIndexes[c]) {
-				tableRow[rowStartIndexes[rowStartIndexes.indexOf(k)]].insertAdjacentHTML('afterend', createNewRow(k));
-				break;
-			}
-		}
-	}**/
-	//tableRow[rowStartIndexes[rowStartIndexes.indexOf(3)]].insertAdjacentHTML('afterend', createNewRow(k));
-
-	//tableData[strongIndexes[0] + 3].innerHTML = "<button class=\"button2\" id=\"copyButton" + 1 + "\">Copy</button>";
-	// used to be k < tableRow.length
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
 			tempK = k;
@@ -468,7 +461,6 @@ try {// button stuff
 			&& !tableRow[k].outerHTML.includes("Additional Translations")
 			&& !tableRow[k].outerHTML.includes("Compound Forms")
 			&& !tableRow[k].outerHTML.includes("langHeader")) {
-
 				for (let p = 0; p < headerRowIndexes.length; p++) {// account for going past bold headers
 					if (k > headerRowIndexes[p]) {
 						headerRowOffsetCount = p+1;
@@ -480,7 +472,16 @@ try {// button stuff
 				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {// first row of definition
 					console.log("First row: " + k);
 					onFirstRow = true;
-					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k);
+					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3)) {
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {// if there is a note on this row, store it and put it back when the button goes away
+							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML;
+						} else {
+							htmlThatButtonRemoved = "";
+						}
+					}
+
+                    currentRowTheCopyButtonIsOn = strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3;
+					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k) + htmlThatButtonRemoved;
 
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
@@ -488,16 +489,20 @@ try {// button stuff
 				} else {// subsequent rows of definition
 					console.log("Subsequent row: " + k);
 					onFirstRow = false;
-					//console.log("copyButtonExists: " + copyButtonExists);
-					if (copyButtonExists) {
-						buttonVariable.outerHTML = "";
-                        buttonVariable = "";
+					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3)) {
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {// if there is a note on this row, store it and put it back when the button goes away
+							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML;
+						} else {
+							htmlThatButtonRemoved = "";
+						}
 					}
-					tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k);
+
+					currentRowTheCopyButtonIsOn = strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3;
+					tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k) + htmlThatButtonRemoved;
+
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
 					copyButtonExists = true;
-
 				}
 
 			}
@@ -561,9 +566,6 @@ try {// button stuff
 						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(4);
 					}
 				}
-
-
-
 				tableRow[k-1].innerHTML = tableRowTemporary;
 				console.log("Text copied:\n" + clipboardArray);
 				noExampleSentenceForDefinition = false;
@@ -572,14 +574,13 @@ try {// button stuff
 			}
 		}
 	}
-
 	for (let m = rowStartIndexes[1]; m <= tableRowIndexes[tableRowIndexes.length-1]; m++) {
 		tableRow[m].onmouseleave = async function(e) {
 			buttonVariable.outerHTML = "";
             buttonVariable = "";
+            copyButtonExists = false;
 		}
 	}
-
 }
 catch (err) {
  	console.log(err);

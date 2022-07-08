@@ -2,7 +2,7 @@ p1 {
     color: white;
 	font-weight: bold;
 	font-family: Cabin;
-	font-size: 23.2px;
+	font-size: 23.7px;
 	user-select: none;
 }
 a {
@@ -12,6 +12,13 @@ a {
 	font-size: 10px;
 	text-align: center;
 	user-select: none;
+}
+a2 {
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 10px;
+	text-align: center;
 }
 
 body {

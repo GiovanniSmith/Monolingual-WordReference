@@ -2,7 +2,7 @@
   "manifest_version": 3,
 
   "name": "WordReference Tweak",
-  "description": "Additional features to WordReference",
+  "description": "Add features to the WordReference online dictionary.",
   "version": "0.1.0",
   "icons": {
     "16": "WordReference Logo 16x PNG.png",
