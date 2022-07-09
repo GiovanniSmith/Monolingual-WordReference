@@ -118,6 +118,21 @@ function addBackslashBeforeApostrophe(text) {
 	}
 }
 
+function removeBackslashBeforeApostrophe(text) {
+	if (text.includes("\\")) {
+		for (let i = 0; i < text.length-1; i++) {
+			if (text.substring(i, i+1) == "\\") {
+				text = text.substring(0, i) + text.substring(i+1, text.length);;
+			}
+		}
+		return text;
+	} else {
+		return text;
+	}
+}
+
+console.log(removeBackslashBeforeApostrophe("Giovanni's stuff isn't here."));
+
 // get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
 for (let i = 0; i < languageAbbreviations.length; i++) {
 	for (let j = 0; j < languageAbbreviations.length; j++) {
@@ -204,7 +219,6 @@ try {
 			definitions.push(ToWrd[i]);
 		}
 	}
-	console.log(definitions);
 	for (i = 0; i < definitions.length; i++) {
 		definitions2.push(definitions[i].innerHTML);
 	}
@@ -256,23 +270,24 @@ function restoreDefinitions() {
 	try {
         for (i = 0; i < definitions.length; i++) {
         	definitions[i].innerHTML = definitions2[i];
-        	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions2[i] + "';");
-			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + definitions2[i] + "';");
+        	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
+			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
         }
         for (i = 0; i < exampleSentences.length; i++) {
 			exampleSentences[i].innerHTML = exampleSentences2[i];
-			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + exampleSentences2[i] + "';");
-            exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + exampleSentences2[i] + "';");
+			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
+            exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
+            console.log(exampleSentences2[i]);
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = pos2_tooltip_2[i];
-			pos2_tooltip[i].setAttribute("onmouseenter", "this.innerHTML='" + pos2_tooltip_2[i] + "';");
-			pos2_tooltip[i].setAttribute("onmouseleave", "this.innerHTML='" + pos2_tooltip_2[i] + "';");
+			pos2_tooltip[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(pos2_tooltip_2[i]) + "';");
+			pos2_tooltip[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(pos2_tooltip_2[i]) + "';");
 		}
 		for (i = 0; i < dsense.length; i++) {
 			dsense[i].innerHTML = dsense2[i];
-			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + dsense2[i] + "';");
-			dsense[i].setAttribute("onmouseleave", "this.innerHTML='" + dsense2[i] + "';");
+			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
+			dsense[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
 		}
 		console.log("restored definitions: " + definitions2.length + ", removed restored: " + exampleSentences2.length +
         					", restored pos2_tooltip: " + pos2_tooltip_2.length + ", restored dsense: " + dsense2.length);
@@ -440,7 +455,7 @@ try {
 			nativeExampleSentenceIndexes.push(-1);
 		}
 	}
-	console.log("headerRowIndexes befoer shift: " + headerRowIndexes);
+	console.log("headerRowIndexes before shift: " + headerRowIndexes);
 	tableRowIndexes.pop();
 	tableRowIndexes.pop();
 	headerRowIndexes.shift();
@@ -530,8 +545,6 @@ try {
                         tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k) + htmlThatButtonRemoved;
 					}
 
-
-
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
 					copyButtonExists = true;
@@ -568,20 +581,20 @@ try {
 				while (!nativeExampleSentenceRowIndexes.includes(kCount)) {
 					kCount++;
 					if (tableRow[k].innerHTML.includes("Is something important missing?")) {
-						console.log("Row directly below definition is the \"Is something important missing?\" sentence. " +
-						"There must not exist an example sentence for this definition.");
+						//console.log("Row directly below definition is the \"Is something important missing?\" sentence. " +
+						//"There must not exist an example sentence for this definition.");
 						noExampleSentenceForDefinition = true;
 						break;
 					}
 					if (rowStartIndexes.includes(kCount)) {
-						console.log("rowStartIndexes value found while increasing kCount. " +
-						"There must not exist an example sentence for this definition.");
+						//console.log("rowStartIndexes value found while increasing kCount. " +
+						//"There must not exist an example sentence for this definition.");
 						noExampleSentenceForDefinition = true;
 						break;
 					}
 					if ((kCount - k) > 30) {
-						console.log("kCount is getting too large without finding a nativeExampleSentenceRowIndexes value. " +
-						"There must not exist an example sentence for this definition.");
+						//console.log("kCount is getting too large without finding a nativeExampleSentenceRowIndexes value. " +
+						//"There must not exist an example sentence for this definition.");
 						noExampleSentenceForDefinition = true;
 						break;
 					}
@@ -592,31 +605,31 @@ try {
 						// nativeExampleSentenceRowIndexes
 						findNativeExampleSentenceCounter++;
 					}
-					console.log("tableRow[findNativeExampleSentenceCounter]: " + tableRow[findNativeExampleSentenceCounter].innerHTML);
+					//console.log("tableRow[findNativeExampleSentenceCounter]: " + tableRow[findNativeExampleSentenceCounter].innerHTML);
 				}
 
 
 				var rowDataStartIndexeskCountVariable;
-				console.log("tableRowTemporary: " + tableRowTemporary);
+				//console.log("tableRowTemporary: " + tableRowTemporary);
 				clipboardArrayWithHTML = tableRowTemporary.split("<td")[2].replace(/<\/?[^>]+(>|$)/g, "").substring(2);
-				console.log("Trying to splice this up: " + clipboardArrayWithHTML);
+				//console.log("Trying to splice this up: " + clipboardArrayWithHTML);
 				for (let b = 0; b < clipboardArrayWithHTML.length; b++) {
 					if (clipboardArrayWithHTML.charAt(b) == ")") {
-						console.log("b:" + b);
+						//console.log("b:" + b);
 						clipboardArrayWithHTML = clipboardArrayWithHTML.substring(0, b+1);
 						break;
 					}
 				}
-				console.log("after splice: " + clipboardArrayWithHTML);
+				//console.log("after splice: " + clipboardArrayWithHTML);
 				// check if there is actually an example sentence available below the current row
 				if (!noExampleSentenceForDefinition) {
 					clipboardArray = clipboardArrayWithHTML;
 					if (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "").includes("&nbsp")) {
 						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(6);
-						console.log("didn't take from the copy button");
+						//console.log("didn't take from the copy button");
 					} else {// accidentally takes text from the copy button, so cut it off
 						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(4);
-						console.log("took from the copy button");
+						//console.log("took from the copy button");
 					}
 					// check if there is another example sentence under this one
 					if (nativeExampleSentenceRowIndexes.includes(findNativeExampleSentenceCounter+1)) {
@@ -626,7 +639,7 @@ try {
 				} else {
 					if (clipboardArrayWithHTML == "") {
 						// if the html gets messed up, there is no example sentence
-						console.log("No example sentence found. The entire definition probably is only one row.");
+						//console.log("No example sentence found. The entire definition probably is only one row.");
 						tableRowTemporary = tableRow[k].innerHTML;
 						clipboardArrayWithHTML = tableRowTemporary.split("<td")[2].replace(/<\/?[^>]+(>|$)/g, "").substring(2);
 						clipboardArray = "";
