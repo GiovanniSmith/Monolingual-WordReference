@@ -104,6 +104,20 @@ function areIntegersAreInOrder(array) {
 	}
 	return returnThis;
 }
+function addBackslashBeforeApostrophe(text) {
+	if (text.includes("\'")) {
+		for (let i = 0; i < text.length-1; i++) {
+			if (text.substring(i, i+1) == "\'") {
+				text = text.substring(0, i) + "\\\'" + text.substring(i+1, text.length);;
+				i++;
+			}
+		}
+		return text;
+	} else {
+		return text;
+	}
+}
+
 // get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
 for (let i = 0; i < languageAbbreviations.length; i++) {
 	for (let j = 0; j < languageAbbreviations.length; j++) {
@@ -211,12 +225,12 @@ catch (exception_var) {
 function removeDefinitions() {
 	try {
         for (i = 0; i < definitions.length; i++) {
-			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions[i].innerHTML + "';");
+			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions[i].innerHTML) + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
 			definitions[i].innerHTML = "[...]";
         }
         for (i = 0; i < exampleSentences.length; i++) {
-			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + exampleSentences[i].innerHTML + "';");
+			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences[i].innerHTML) + "';");
 			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
 			exampleSentences[i].innerHTML = "[...]";
 		}
@@ -224,7 +238,7 @@ function removeDefinitions() {
 			pos2_tooltip[i].innerHTML = "";
 		}
 		for (i = 0; i < dsense.length; i++) {
-			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + def + "';");
+			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(def) + "';");
 			dsense[i].setAttribute("onmouseleave", "this.innerHTML=''");
 			dsense[i].setAttribute("style", "text-align:right");
 			dsense[i].innerHTML = "";
@@ -240,7 +254,7 @@ function removeDefinitions() {
 // restores some html elements to their original text after they have been hidden
 function restoreDefinitions() {
 	try {
-        for (i = 0; i < definitions.length; i++) {// i is 1 so that it doesn't replace the column name text (at least on the first row)
+        for (i = 0; i < definitions.length; i++) {
         	definitions[i].innerHTML = definitions2[i];
         	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions2[i] + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + definitions2[i] + "';");
@@ -301,12 +315,13 @@ try {
     nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
     notePublRowIndexes.shift();
     isSomethingImportantMissingRowIndexes.shift();
-
+	/**
 	console.log("isSomethingImportantMissingRowIndexes: " + isSomethingImportantMissingRowIndexes);
     console.log("strongRowIndexes: " + strongRowIndexes);
     console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
     console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
     console.log("notePublRowIndexes: " + notePublRowIndexes);
+    **/
 	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
 		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
         	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
@@ -438,6 +453,7 @@ try {
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes.shift();
+	/**
 	// add an additional row to account for "is something missing" sentence
 	tableRowIndexes.push(tableRowIndexes[tableRowIndexes.length-1]+1);
 	console.log("--------");
@@ -470,7 +486,7 @@ try {
 	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
-
+	**/
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
 			tempK = k;
