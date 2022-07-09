@@ -9,6 +9,7 @@ var copyStatus = false;
 var languageAbbreviations = ["en", "es", "fr", "pt", "it", "de", "nl", "sv", "ru",
 							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];
 var languageCombinations = [];
+var ToWrd = [];
 var languageCombinationInPage;
 var nativeExampleSentences;
 var FrWrd;
@@ -45,7 +46,8 @@ var headerRowOffsetCount = 0;
 var findNativeExampleSentenceCounter;
 var clipboardSingleElement;
 var clipboardArrayWithHTML;
-var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh, notePubl;
+var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh, notePubl, isSomethingImportantMissing;
+definitions = [];
 var definitions2 = [];
 var exampleSentences2 = [];
 var helperDefinitions2 = [];
@@ -56,6 +58,8 @@ var dsenseTopRow2 = [];
 var pos2_tooltip_2 = [];
 var ph2 = [];
 var dataPh2 = [];
+var isSomethingImportantMissing = [];
+var isSomethingImportantMissingRowIndexes = [];
 var i = 0;
 var def = "";
 var even;
@@ -72,6 +76,7 @@ var countNewRowsNotes = 0;
 var modifiedRows = [];
 var htmlThatButtonRemoved = "";
 var currentRowTheCopyButtonIsOn;
+var definitionOnlyTakesUpOneRow = false;
 
 var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 
@@ -156,9 +161,8 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-
 try {
-	definitions = document.getElementsByClassName('ToWrd');
+	ToWrd = document.getElementsByClassName('ToWrd');
 	exampleSentences = document.getElementsByClassName("ToEx");
 	helperDefinitions = document.getElementsByClassName("To2");
 	dsense = document.getElementsByClassName("dsense");
@@ -171,13 +175,22 @@ try {
 	strong = document.getElementsByTagName("strong");
 	ph = document.getElementsByClassName("ph");
 	notePubl = document.getElementsByClassName("notePubl");
+	isSomethingImportantMissing = document.getElementsByClassName("even more");
 }
 catch (exception_var) {
 	console.log(exception_var);
 }
-
+function removeDataPh(number) {
+	return !number.outerHTML.includes("data-ph");
+}
 // fill up the second array beforehand to ensure that later on, the first array doesn't draw from an empty array
 try {
+	for (i = 0; i < ToWrd.length; i++) {//
+		if (!ToWrd[i].innerHTML.includes("sLang_")) {
+			definitions.push(ToWrd[i]);
+		}
+	}
+	console.log(definitions);
 	for (i = 0; i < definitions.length; i++) {
 		definitions2.push(definitions[i].innerHTML);
 	}
@@ -200,7 +213,7 @@ function removeDefinitions() {
         for (i = 0; i < definitions.length; i++) {
 			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions[i].innerHTML + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
-        	definitions[i].innerHTML = "[...]";
+			definitions[i].innerHTML = "[...]";
         }
         for (i = 0; i < exampleSentences.length; i++) {
 			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + exampleSentences[i].innerHTML + "';");
@@ -269,7 +282,8 @@ try {
 		if (tableRow[k].outerHTML.includes("<strong>") && tableRow[k].outerHTML.includes("FrWrd")) {
 			strongRowIndexes.push(k);
 		}
-		if (tableRow[k].outerHTML.includes("Additional Translations") || tableRow[k].outerHTML.includes("Compound Forms")) {
+		if (tableRow[k].outerHTML.includes("sMainMeanings") || tableRow[k].outerHTML.includes("sAddTrans")
+			|| tableRow[k].outerHTML.includes("sCmpdForms")) {
 			headerRowIndexes.push(k);
 		}
 		if (tableRow[k].outerHTML.includes("notePubl")) {
@@ -278,12 +292,17 @@ try {
 				notePublRowTouchingStrongIndexes.push(k);
 			}
 		}
+		if (tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")) {
+			isSomethingImportantMissingRowIndexes.push(k);
+		}
 	}
 	strongRowIndexes.shift();
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
     nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
     notePublRowIndexes.shift();
+    isSomethingImportantMissingRowIndexes.shift();
 
+	console.log("isSomethingImportantMissingRowIndexes: " + isSomethingImportantMissingRowIndexes);
     console.log("strongRowIndexes: " + strongRowIndexes);
     console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
     console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
@@ -406,6 +425,7 @@ try {
 			nativeExampleSentenceIndexes.push(-1);
 		}
 	}
+	console.log("headerRowIndexes befoer shift: " + headerRowIndexes);
 	tableRowIndexes.pop();
 	tableRowIndexes.pop();
 	headerRowIndexes.shift();
@@ -418,7 +438,8 @@ try {
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes.shift();
-
+	// add an additional row to account for "is something missing" sentence
+	tableRowIndexes.push(tableRowIndexes[tableRowIndexes.length-1]+1);
 	console.log("--------");
 	console.log("strongRowIndexes: " + strongRowIndexes);
 	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
@@ -449,6 +470,7 @@ try {
 	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
+
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
 			tempK = k;
@@ -457,31 +479,42 @@ try {
 				rowStartIndexesCount++;
 			}
 			if (copyStatus
-			&& !tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")
+			//&& !tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")
 			&& !tableRow[k].outerHTML.includes("Additional Translations")
 			&& !tableRow[k].outerHTML.includes("Compound Forms")
 			&& !tableRow[k].outerHTML.includes("langHeader")) {
 				for (let p = 0; p < headerRowIndexes.length; p++) {// account for going past bold headers
 					if (k > headerRowIndexes[p]) {
-						headerRowOffsetCount = p+1;
+						headerRowOffsetCount = p;
 					} else if (k < headerRowIndexes[0]){
 						headerRowOffsetCount = 0;
 					}
 				}
-
 				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {// first row of definition
 					console.log("First row: " + k);
 					onFirstRow = true;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3)) {
-						if (tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {// if there is a note on this row, store it and put it back when the button goes away
+						// if there is a note on this row, store it and put it back when the button goes away
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {
 							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML;
 						} else {
 							htmlThatButtonRemoved = "";
 						}
 					}
 
-                    currentRowTheCopyButtonIsOn = strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3;
-					tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k) + htmlThatButtonRemoved;
+					if (rowStartIndexes.includes(k+1)) {
+						console.log("There are no example sentences for this definition.");
+						definitionOnlyTakesUpOneRow = true;
+						htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 0].innerHTML;
+						currentRowTheCopyButtonIsOn = strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 0;
+                        tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 0].innerHTML = htmlThatButtonRemoved + createCopyButton(k);
+					} else {
+						definitionOnlyTakesUpOneRow = false;
+						currentRowTheCopyButtonIsOn = strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3;
+                        tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML = createCopyButton(k) + htmlThatButtonRemoved;
+					}
+
+
 
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
@@ -489,8 +522,10 @@ try {
 				} else {// subsequent rows of definition
 					console.log("Subsequent row: " + k);
 					onFirstRow = false;
+					definitionOnlyTakesUpOneRow = false;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3)) {
-						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {// if there is a note on this row, store it and put it back when the button goes away
+						// if there is a note on this row, store it and put it back when the button goes away
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {
 							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML;
 						} else {
 							htmlThatButtonRemoved = "";
@@ -503,8 +538,8 @@ try {
 					buttonVariable = document.getElementById("copyButton" + k);
 					rowStartIndexesCount = 0;
 					copyButtonExists = true;
-				}
 
+				}
 			}
 			//console.log("buttonVariable:" + buttonVariable);
 			const sendMessageButton = document.getElementById('copyButton' + k);
@@ -516,6 +551,12 @@ try {
 				kCount = k;
 				while (!nativeExampleSentenceRowIndexes.includes(kCount)) {
 					kCount++;
+					if (tableRow[k].innerHTML.includes("Is something important missing?")) {
+						console.log("Row directly below definition is the \"Is something important missing?\" sentence. " +
+						"There must not exist an example sentence for this definition.");
+						noExampleSentenceForDefinition = true;
+						break;
+					}
 					if (rowStartIndexes.includes(kCount)) {
 						console.log("rowStartIndexes value found while increasing kCount. " +
 						"There must not exist an example sentence for this definition.");
@@ -538,18 +579,11 @@ try {
 					console.log("tableRow[findNativeExampleSentenceCounter]: " + tableRow[findNativeExampleSentenceCounter].innerHTML);
 				}
 
-				console.log("k: " + k);
-				console.log("kCount: " + kCount);
-				console.log("rowDataStartIndexes[kCount]-1: ");
-				console.log(rowDataStartIndexes[kCount]-1);
-				console.log("rowStartIndexes: ");
-				console.log(rowStartIndexes);
+
 				var rowDataStartIndexeskCountVariable;
-				if (checkbox1Enabled) {
-					console.log("checkbox1Enabled: " + checkbox1Enabled);
-				}
-				//console.log("tableRowTemporary: " + tableRowTemporary);
+				console.log("tableRowTemporary: " + tableRowTemporary);
 				clipboardArrayWithHTML = tableRowTemporary.split("<td")[2].replace(/<\/?[^>]+(>|$)/g, "").substring(2);
+				console.log("Trying to splice this up: " + clipboardArrayWithHTML);
 				for (let b = 0; b < clipboardArrayWithHTML.length; b++) {
 					if (clipboardArrayWithHTML.charAt(b) == ")") {
 						console.log("b:" + b);
@@ -557,16 +591,37 @@ try {
 						break;
 					}
 				}
-				clipboardArray = clipboardArrayWithHTML;
+				console.log("after splice: " + clipboardArrayWithHTML);
 				// check if there is actually an example sentence available below the current row
 				if (!noExampleSentenceForDefinition) {
+					clipboardArray = clipboardArrayWithHTML;
 					if (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "").includes("&nbsp")) {
-						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(6);;
+						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(6);
+						console.log("didn't take from the copy button");
 					} else {// accidentally takes text from the copy button, so cut it off
 						clipboardArray += "\n\n" + (tableRow[findNativeExampleSentenceCounter].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(4);
+						console.log("took from the copy button");
+					}
+					// check if there is another example sentence under this one
+					if (nativeExampleSentenceRowIndexes.includes(findNativeExampleSentenceCounter+1)) {
+						clipboardArray += "\n" + (tableRow[findNativeExampleSentenceCounter+1].innerHTML.replace(/<\/?[^>]+(>|$)/g, "")).substring(6);
+					}
+					tableRow[k-1].innerHTML = tableRowTemporary;
+				} else {
+					if (clipboardArrayWithHTML == "") {
+						// if the html gets messed up, there is no example sentence
+						console.log("No example sentence found. The entire definition probably is only one row.");
+						tableRowTemporary = tableRow[k].innerHTML;
+						clipboardArrayWithHTML = tableRowTemporary.split("<td")[2].replace(/<\/?[^>]+(>|$)/g, "").substring(2);
+						clipboardArray = "";
+						clipboardArray += clipboardArrayWithHTML;
+					} else {
+						// if the text copied is already fine
+						clipboardArray = "";
+                        clipboardArray += clipboardArrayWithHTML;
 					}
 				}
-				tableRow[k-1].innerHTML = tableRowTemporary;
+
 				console.log("Text copied:\n" + clipboardArray);
 				noExampleSentenceForDefinition = false;
 				navigator.clipboard.writeText(clipboardArray);
@@ -579,6 +634,7 @@ try {
 			buttonVariable.outerHTML = "";
             buttonVariable = "";
             copyButtonExists = false;
+            onFirstRow = false;
 		}
 	}
 }
