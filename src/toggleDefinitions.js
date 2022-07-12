@@ -77,6 +77,7 @@ var modifiedRows = [];
 var htmlThatButtonRemoved = "";
 var currentRowTheCopyButtonIsOn;
 var definitionOnlyTakesUpOneRow = false;
+var textThatIsBeingReplaced = "";
 
 var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 
@@ -131,7 +132,28 @@ function removeBackslashBeforeApostrophe(text) {
 	}
 }
 
-console.log(removeBackslashBeforeApostrophe("Giovanni's stuff isn't here."));
+function displayTextWidth(text, font) { // https://www.w3docs.com/snippets/javascript/how-to-calculate-text-width-with-javascript.html
+  let canvas = displayTextWidth.canvas || (displayTextWidth.canvas = document.createElement("canvas"));
+  let context = canvas.getContext("2d");
+  context.font = font;
+  let metrics = context.measureText(text);
+  return metrics.width;
+}
+
+function equalLengthBrackets(text) {
+	/**
+	var returnThis;
+	var dots = "";
+	if (text.length <= 2) {
+		returnThis = "[]";
+	} else {
+		for (let i = 0; i <= (displayTextWidth(text)/displayTextWidth("a")) + 1; i++) {
+			dots += "a";
+		}
+	}
+	**/
+	return "[...]";
+}
 
 // get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
 for (let i = 0; i < languageAbbreviations.length; i++) {
@@ -143,31 +165,26 @@ for (let i = 0; i < languageAbbreviations.length; i++) {
 chrome.storage.local.get(['toggleDefinitions', 'toggleCopy'], function(variable) {
 	if (variable.toggleDefinitions == null) {
 		chrome.storage.local.set({toggleDefinitions: false}, function() {});
-		console.log("variable.toggleDefinitions was null, now it's: " + variable.toggleDefinitions);
 		restoreDefinitions();
 	} else if (variable.toggleDefinitions == true) {
 		chrome.storage.local.set({toggleDefinitions: true}, function() {});
-		console.log("variable.toggleDefinition: " + variable.toggleDefinitions);
 		//restoreDefinitions();
 	} else if (variable.toggleDefinitions == false) {
 		chrome.storage.local.set({toggleDefinitions: false}, function() {});
-		console.log("variable.toggleDefinition: " + variable.toggleDefinitions);
 		removeDefinitions();
 	}
 
 	if (variable.toggleCopy == null) {
 		chrome.storage.local.set({toggleCopy: false}, function() {});
-		console.log("variable.toggleCopy used to be null, now it's: " + variable.toggleCopy);
 		copyStatus = true;
 	} else if (variable.toggleCopy == true) {
 		chrome.storage.local.set({toggleCopy: true}, function() {});
-		console.log("variable.toggleCopy: " + variable.toggleCopy);
 		copyStatus = false;
 	} else if (variable.toggleCopy == false) {
 		chrome.storage.local.set({toggleCopy: false}, function() {});
-		console.log("variable.toggleCopy: " + variable.toggleCopy);
 		copyStatus = true;
 	}
+	console.log("variable.toggleDefinitions: " + variable.toggleDefinitions);
 });
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -181,12 +198,11 @@ chrome.runtime.onMessage.addListener(
 	  if (request.toggleCopyKey == true) {
 	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
 	  	copyStatus = true;
-	  	console.log("copyStatus: " + copyStatus);
 	  } else if (request.toggleCopyKey == false) {
 	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
 	  	copyStatus = false;
-	  	console.log("copyStatus: " + copyStatus);
 	  }
+	  console.log("request.toggleDefinitionsKey: " + request.toggleDefinitionsKey);
     }
 );
 
@@ -244,9 +260,10 @@ function removeDefinitions() {
 			definitions[i].innerHTML = "[...]";
         }
         for (i = 0; i < exampleSentences.length; i++) {
+        	textThatIsBeingReplaced = equalLengthBrackets(exampleSentences[i].innerHTML.replace(/<\/?[^>]+(>|$)/g, ""));
 			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences[i].innerHTML) + "';");
-			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
-			exampleSentences[i].innerHTML = "[...]";
+			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + textThatIsBeingReplaced + "';");
+			exampleSentences[i].innerHTML = textThatIsBeingReplaced;
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = "";
@@ -270,14 +287,13 @@ function restoreDefinitions() {
 	try {
         for (i = 0; i < definitions.length; i++) {
         	definitions[i].innerHTML = definitions2[i];
-        	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
-			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
+        	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions2[i] + "';");
+			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + definitions2[i] + "';");
         }
         for (i = 0; i < exampleSentences.length; i++) {
 			exampleSentences[i].innerHTML = exampleSentences2[i];
 			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
             exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
-            console.log(exampleSentences2[i]);
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = pos2_tooltip_2[i];
@@ -438,7 +454,7 @@ try {
 				ph[i].innerHTML = "Compound Forms";
 			}
 		}
-	}// header change
+	}
 
 	for (let k = 0; k < tableData.length; k++) {
 		if (tableData[k].outerHTML.includes("<td>")) {// get location of each data in row
@@ -610,7 +626,6 @@ try {
 
 
 				var rowDataStartIndexeskCountVariable;
-				//console.log("tableRowTemporary: " + tableRowTemporary);
 				clipboardArrayWithHTML = tableRowTemporary.split("<td")[2].replace(/<\/?[^>]+(>|$)/g, "").substring(2);
 				//console.log("Trying to splice this up: " + clipboardArrayWithHTML);
 				for (let b = 0; b < clipboardArrayWithHTML.length; b++) {

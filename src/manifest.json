@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
 
-  "name": "WordReference Tweak",
-  "description": "Add features to the WordReference online dictionary.",
+  "name": "Monolingual WordReference",
+  "description": "Hides native language definitions, along with other features.",
   "version": "1.0.0",
   "icons": {
     "16": "WordReference Logo 16x PNG.png",
@@ -27,13 +27,13 @@
     {
       "matches": [
         "https://www.wordreference.com/*"],
-      "js": ["toggle.js"],
+      "js": ["toggleDefinitions.js", "toggleCopyButton.js"],
       "css": ["pageStyles.css"],
       "run_at": "document_end",
       "persistent": true
     }
   ],
   "background": {
-    "service_worker": "toggle.js"
+    "service_worker": "toggleDefinitions.js"
   }
 }

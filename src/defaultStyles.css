@@ -1,8 +1,13 @@
-p1 {
+body {
+  background-color: #5e58c6;
+  font-color: black;
+}
+
+largeText {
     color: white;
 	font-weight: bold;
 	font-family: Cabin;
-	font-size: 23.7px;
+	font-size: 18.6px;
 	user-select: none;
 }
 a {
@@ -17,13 +22,17 @@ a2 {
     color: white;
 	font-weight: bold;
 	font-family: Cabin;
+	font-size: 15px;
+	text-align: center;
+	user-select: none;
+}
+smallTextUnClickable {
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
 	font-size: 10px;
 	text-align: center;
-}
-
-body {
-  background-color: #5e58c6;
-  font-color: black;
+	user-select: none;
 }
 
 button {
@@ -39,25 +48,93 @@ button {
   height:60px;
 }
 button:hover {
-  background-color: #ffaa5e;
+  	background-color: #ffaa5e;
 }
 button:active {
 	background-color: #c77123;
 }
 
-testButton {
-  background-color: #000000;
-  border: 3;
-  border-color: white;
-  color: white;
-  padding: 5px 75px;
-  font-size: 16px;
-  font-family: Cabin;
-  cursor: pointer;
+/** https://stackoverflow.com/questions/27417398/how-to-change-the-checked-mark-color-of-a-checkbox-in-html **/
+input[type="checkbox"]:checked + label::after {
+   content: '';
+   position: absolute;
+   width: 1.2ex;
+   height: 0.4ex;
+   background: rgba(0, 0, 0, 0);
+   top: 0.9ex;
+   left: 0.4ex;
+   border: 3px solid black;
+   border-top: none;
+   border-right: none;
+   -webkit-transform: rotate(-45deg);
+   -moz-transform: rotate(-45deg);
+   -o-transform: rotate(-45deg);
+   -ms-transform: rotate(-45deg);
+   transform: rotate(-45deg);
 }
-testButton:hover {
-  background-color: #ffaa5e;
+input[type="radio"]:checked + label::after {
+   content: '';
+   position: absolute;
+   width: 1.2ex;
+   height: 0.4ex;
+   background: rgba(0, 0, 0, 0);
+   top: 0.9ex;
+   left: 0.4ex;
+   border: 3px solid black;
+   border-top: none;
+   border-right: none;
+   -webkit-transform: rotate(-45deg);
+   -moz-transform: rotate(-45deg);
+   -o-transform: rotate(-45deg);
+   -ms-transform: rotate(-45deg);
+   transform: rotate(-45deg);
 }
-testButton:active {
-	background-color: #c77123;
+
+input[type="checkbox"] {
+   line-height: 2.1ex;
+}
+input[type="radio"] {
+   line-height: 2.1ex;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+	position: absolute;
+	left: -999em;
+}
+
+input[type="checkbox"] + label {
+	position: relative;
+	overflow: hidden;
+	cursor: pointer;
+}
+input[type="radio"] + label {
+	position: relative;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+input[type="checkbox"] + label::before {
+   content: "";
+   display: inline-block;
+   vertical-align: -25%;
+   height: 2ex;
+   width: 2ex;
+   background-color: white;
+   border: 1px solid rgb(166, 166, 166);
+   border-radius: 0.1px;
+   box-shadow: inset 0 2px 5px rgba(0,0,0,0.25);
+   margin-right: 0.5em;
+}
+input[type="radio"] + label::before {
+   content: "";
+   display: inline-block;
+   vertical-align: -25%;
+   height: 2ex;
+   width: 2ex;
+   background-color: white;
+   border: 1px solid rgb(166, 166, 166);
+   border-radius: 20px;
+   box-shadow: inset 0 2px 5px rgba(0,0,0,0.25);
+   margin-right: 0.5em;
 }

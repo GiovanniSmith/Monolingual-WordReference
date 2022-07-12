@@ -6,11 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     	chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
             let url = tabs[0].url;
             chrome.storage.local.get(['toggleDefinitions'], function(variable) {
-            	//if (variable.toggleDefinitions == null) {
-            	//	chrome.tabs.sendMessage(tabs[0].id, {toggleDefinitionsKey: true}, function(response) {});
-            	//} else {
-            		chrome.tabs.sendMessage(tabs[0].id, {toggleDefinitionsKey: variable.toggleDefinitions}, function(response) {});
-            	//}
+				chrome.tabs.sendMessage(tabs[0].id, {toggleDefinitionsKey: variable.toggleDefinitions}, function(response) {});
             });
         });
     }
@@ -22,12 +18,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			let url = tabs[0].url;
 			chrome.storage.local.get(['toggleCopy'], function(variable) {
-				//if (variable.toggleCopy == null) {
-				//	chrome.tabs.sendMessage(tabs[0].id, {toggleCopyKey: true}, function(response) {});
-				//} else {
-					chrome.tabs.sendMessage(tabs[0].id, {toggleCopyKey: variable.toggleCopy}, function(response) {});
-				//}
+				chrome.tabs.sendMessage(tabs[0].id, {toggleCopyKey: variable.toggleCopy}, function(response) {});
 			});
 		});
 	}
+
 }, false);
