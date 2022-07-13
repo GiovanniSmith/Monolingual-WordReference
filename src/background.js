@@ -1,3 +1,10 @@
+
+
+const dragArea = document.querySelector(".wrapper");
+new Sortable(dragArea, {
+  animation: 350
+});
+/** **/
 document.addEventListener('DOMContentLoaded', function() {
 	const sendMessageButton = document.getElementById('toggleDefinitions');
     sendMessageButton.onclick = async function(e) {

@@ -1,13 +1,16 @@
 <!doctype html>
-<html>
+<html lang="en" >
 <header>
-    <link rel="stylesheet" type="text/css" href="defaultStyles.css" />
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="defaultStyles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="drag.js"></script>
     <span><largeText>Monolingual WordReference</largeText></span>
-    <script src="background.js"></script>
 </header>
 <body>
     <hr>
-    <button class = "toggle" id="toggleDefinitions">Toggle all definitions</button>
+    <button id="toggleDefinitions" class="toggle">Toggle all definitions</button>
         <a>
             When does a definition get shown?<br>
             <input type="radio" id="radio1" name="rad" value="0" checked="checked">
@@ -16,32 +19,63 @@
             <label for="radio2">Click</label><br>
         </a>
     <hr>
-    <button class = "toggle" id="toggleCopy">Toggle copy button</button>
+    <button id="toggleCopy" class="toggle">Toggle copy button</button>
     <a>What gets copied?</a>
     <br>
-    <div>
-        <a>
+    <div class="wrapper">
+        <div class="item">
             <input type="checkbox" id="fw" name="copy" value="0">
             <label for="fw">Foreign word</label><br>
-            <input type="checkbox" id="fd" name="copy" value="0">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="fd" name="copy" value="0" checked="checked">
             <label for="fd">Foreign definition</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
             <input type="checkbox" id="nd" name="copy" value="0">
             <label for="nd">Native definition</label><br>
-            <input type="checkbox" id="fs" name="copy" value="0">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="fs" name="copy" value="0" checked="checked">
             <label for="fs">Foreign sentence</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
             <input type="checkbox" id="ns" name="copy" value="0">
             <label for="ns">Native sentence</label><br>
-        </a>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="br1" name="copy" value="0">
+            <label for="br1">(line break)</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="br2" name="copy" value="0">
+            <label for="br2">(line break)</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="br3" name="copy" value="0">
+            <label for="br3">(line break)</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="item">
+            <input type="checkbox" id="br4" name="copy" value="0">
+            <label for="br4">(line break)</label><br>
+            <i class="fas fa-bars"></i>
+        </div>
     </div>
     <hr>
     <a href="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ" target="_blank">Donate</a>
     <a href="https://github.com/Giospiral/Monolingual-WordReference" target="_blank">Github</a>
     <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank">Bug report</a>
     <br>
-    <smallTextUnclickable>Version: 1.0.0</smallTextUnclickable>
-    <br>
 </body>
-
+<script src="background.js"></script>
 </html>
 <!--
 #130FE2 blue

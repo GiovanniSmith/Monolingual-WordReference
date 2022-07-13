@@ -2,7 +2,7 @@
   "manifest_version": 3,
 
   "name": "Monolingual WordReference",
-  "description": "Hides native language definitions, along with other features.",
+  "description": "Hides native language definitions in the WordReference dictionary, along with other features.",
   "version": "1.0.0",
   "icons": {
     "16": "WordReference Logo 16x PNG.png",
