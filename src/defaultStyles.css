@@ -29,6 +29,15 @@ a2 {
 	user-select: none;
 	text-shadow: 0px 1px #000000;
 }
+aRed {
+    color: #FFF200;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 10px;
+	text-align: center;
+	user-select: none;
+	text-shadow: 0px 1px red;
+}
 smallTextUnClickable {
     color: white;
 	font-weight: bold;
@@ -76,6 +85,26 @@ button.move:hover {
 }
 button.move:active {
 	background-color: #3a3a3a;
+}
+
+button.save {
+  background-color: #FE902D;
+  border: 3;
+  border-color: white;
+  color: white;
+  padding: 2px 2px;
+  font-size: 12px;
+  font-family: Cabin;
+  cursor: pointer;
+  width:120px;
+  height:24px;
+  text-shadow: 0px 1px #000000;
+}
+button.save:hover {
+  	background-color: #ffaa5e;
+}
+button.save:active {
+	background-color: #c77123;
 }
 
 /** https://stackoverflow.com/questions/27417398/how-to-change-the-checked-mark-color-of-a-checkbox-in-html **/
@@ -185,7 +214,7 @@ body{
 **/
 .wrapper{
   padding: 0px;
-  max-width: 140px;
+  max-width: 250px;
   width: 100%;
   /**box-shadow: 0px 10px 5px rgba(0,0,0,0.2);**/
 }
@@ -202,7 +231,6 @@ body{
   font-family: Cabin;
   text-shadow: 0px 1px #000000;
   background-color: #5e58c6;
-
 }
 .wrapper .item:last-child{
   margin-bottom: 0px;
@@ -214,4 +242,33 @@ body{
 .wrapper .item i{
   /**font-size: 18px;**/
   cursor: pointer;
+}
+
+.wrapper .itemGray{
+  color: #bbbbbb;
+  display: flex;
+  margin-bottom: 0px;
+  padding: 0px 0px;
+  background: #304B5F;
+  border-radius: 3px;
+  align-items: left;
+  justify-content: center;
+  font-size: 5px;
+  font-family: Cabin;
+  text-shadow: 0px 1px #000000;
+  background-color: #5e58c6;
+}
+.wrapper .itemGray:last-child{
+  margin-bottom: 0px;
+  font-size: 5px;
+}
+.wrapper .itemGray .text{
+  /**font-size: 18px;**/
+  /**font-weight: 400;**/
+  font-size: 5px;
+}
+.wrapper .itemGray i{
+  /**font-size: 18px;**/
+  cursor: pointer;
+  font-size: 5px;
 }
