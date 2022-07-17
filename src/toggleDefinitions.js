@@ -118,6 +118,19 @@ function addBackslashBeforeApostrophe(text) {
 		return text;
 	}
 }
+function addBackslashBeforeDoubleApostrophe(text) {
+	if (text.includes("\"")) {
+		for (let i = 0; i < text.length-1; i++) {
+			if (text.substring(i, i+1) == "\"") {
+				text = text.substring(0, i) + "\\\"" + text.substring(i+1, text.length);;
+				i++;
+			}
+		}
+		return text;
+	} else {
+		return text;
+	}
+}
 
 function removeBackslashBeforeApostrophe(text) {
 	if (text.includes("\\")) {
@@ -162,7 +175,7 @@ for (let i = 0; i < languageAbbreviations.length; i++) {
     }
 }
 // have the status of toggleDefinitions and toggleCopy change when the respective button is clicked
-chrome.storage.local.get(['toggleDefinitions', 'toggleCopy'], function(variable) {
+chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio'], function(variable) {
 	if (variable.toggleDefinitions == null) {
 		chrome.storage.local.set({toggleDefinitions: false}, function() {});
 		restoreDefinitions();
@@ -184,7 +197,11 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy'], function(variable)
 		chrome.storage.local.set({toggleCopy: false}, function() {});
 		copyStatus = true;
 	}
-	console.log("variable.toggleDefinitions: " + variable.toggleDefinitions);
+	if (variable.radio == true) {
+		alert("amo");
+	} else if (variable.radio == false) {
+		alert("gus");
+	}
 });
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -202,7 +219,6 @@ chrome.runtime.onMessage.addListener(
 	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
 	  	copyStatus = false;
 	  }
-	  console.log("request.toggleDefinitionsKey: " + request.toggleDefinitionsKey);
     }
 );
 

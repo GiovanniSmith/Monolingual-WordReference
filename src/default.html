@@ -5,7 +5,6 @@
     <link rel="stylesheet" type="text/css" href="defaultStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="drag.js"></script>
     <span><largeText>Monolingual WordReference</largeText></span>
 </header>
 <body>
@@ -22,58 +21,22 @@
     <button id="toggleCopy" class="toggle">Toggle copy button</button>
     <a>What gets copied?</a>
     <br>
-    <div class="wrapper" id ="wrapperId">
-        <div class="item">
-            <input type="checkbox" id="fw" name = "text" value = "fw">
-            <label for="fw">Foreign word</label><label for="fw" class="itemGray">comer</label><br>
+    <div class="wrapper" id="wrapperId">
+        <div class="item" id="fwRegion">
+            <input class = "text" type="checkbox" id="fw">
+            <label class = "text" for="fw">Foreign word</label><br>
             <i class="fas fa-bars"></i>
         </div>
-        <div class="item">
-            <input type="checkbox" id="br1" name = "space" value = "br1">
-            <label for="br1">(space)</label><br>
+        <div class="item" id="fdRegion">
+            <input class = "text" type="checkbox" id="fd">
+            <label class = "text" for="fd">Foreign definition</label><br>
             <i class="fas fa-bars"></i>
         </div>
-        <div class="item">
-            <input type="checkbox" id="fd" name = "text" value = "fd" checked="checked">
-            <label for="fd">Foreign definition</label><label for="fw" class="itemGray">(ingerir, tragar)</label><br>
+        <div class="item" id="fsRegion">
+            <input class = "text" type="checkbox" id="fs">
+            <label class = "text" for="fs">Foreign sentence</label><br>
             <i class="fas fa-bars"></i>
         </div>
-        <div class="item">
-            <input type="checkbox" id="br2" name = "space" value = "br2" checked="checked">
-            <label for="br2">(space)</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="nd" name = "text" value = "nd">
-            <label for="nd">Native definition</label><label for="fw" class="itemGray">eat</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="br3" name = "space" value = "br3">
-            <label for="br3">(space)</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="fs" name = "text" value = "fs" checked="checked">
-            <label for="fs">Foreign sentence</label><label for="fw" class="itemGray">Come verduras.</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="br4" name = "space" value = "br4">
-            <label for="br4">(space)</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="ns" name = "text" value = "ns">
-            <label for="ns">Native sentence</label><label for="fw" class="itemGray">Eat vegetables.</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="item">
-            <input type="checkbox" id="br5" name = "space" value = "br5">
-            <label for="br5">(space)</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
-
     </div>
     <br>
     <button id="saveChanges" class="save">Save checkbox order</button>
@@ -84,6 +47,7 @@
     <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank">Bug report</a>
     <br>
 </body>
+<script src="drag.js"></script>
 <script src="background.js"></script>
 </html>
 <!--
