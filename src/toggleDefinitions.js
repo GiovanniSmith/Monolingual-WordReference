@@ -78,6 +78,16 @@ var htmlThatButtonRemoved = "";
 var currentRowTheCopyButtonIsOn;
 var definitionOnlyTakesUpOneRow = false;
 var textThatIsBeingReplaced = "";
+var idOrder = [];
+var idWhichTrue = [];
+var hoverOrClickAttributeName = "onmouseenter";
+var exampleSentenceRowIndexes = [];
+
+var foreignDefinitions = [];
+var foreignTranslations = [];
+var foreignSentences = [];
+var nativeTranslations = [];
+var nativeSentences = [];
 
 var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 
@@ -175,7 +185,9 @@ for (let i = 0; i < languageAbbreviations.length; i++) {
     }
 }
 // have the status of toggleDefinitions and toggleCopy change when the respective button is clicked
-chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio'], function(variable) {
+chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio', 'fdStatus', 'b1Status', 'ftStatus',
+						'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
+						'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
 	if (variable.toggleDefinitions == null) {
 		chrome.storage.local.set({toggleDefinitions: false}, function() {});
 		restoreDefinitions();
@@ -197,11 +209,41 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio'], function(
 		chrome.storage.local.set({toggleCopy: false}, function() {});
 		copyStatus = true;
 	}
-	if (variable.radio == true) {
-		alert("amo");
-	} else if (variable.radio == false) {
-		alert("gus");
+
+	if (variable.radio == "radio1") {
+		hoverOrClickAttributeName = "onmouseenter";
+		changeAttributeNameFromTo("onclick", hoverOrClickAttributeName);
+	} else if (variable.radio == "radio2") {
+		hoverOrClickAttributeName = "onclick";
+		changeAttributeNameFromTo("onmouseenter", hoverOrClickAttributeName);
 	}
+
+	if (idWhichTrue != null)
+		idWhichTrue = [];
+	if (variable.fdStatus == true)
+		idWhichTrue.push("fd");
+	if (variable.ftStatus == true)
+		idWhichTrue.push("ft");
+	if (variable.fsStatus == true)
+		idWhichTrue.push("fs");
+	if (variable.ntStatus == true)
+		idWhichTrue.push("nt");
+	if (variable.nsStatus == true)
+		idWhichTrue.push("ns");
+
+	if (variable.b1Status == true)
+		idWhichTrue.push("b1");
+	if (variable.b2Status == true)
+		idWhichTrue.push("b2");
+	if (variable.b3Status == true)
+		idWhichTrue.push("b3");
+	if (variable.b4Status == true)
+		idWhichTrue.push("b4");
+	if (variable.b5Status == true)
+		idWhichTrue.push("b5");
+
+	console.log(idWhichTrue);
+
 });
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -219,6 +261,60 @@ chrome.runtime.onMessage.addListener(
 	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
 	  	copyStatus = false;
 	  }
+	  if (request.radioKey == "radio1") {
+	  	console.log("Hover has been selected");
+	  	hoverOrClickAttributeName = "onmouseenter";
+	  	changeAttributeNameFromTo("onclick", hoverOrClickAttributeName);
+	  } else if (request.radioKey == "radio2") {
+	  	console.log("Click has been selected");
+	  	hoverOrClickAttributeName = "onclick";
+	  	changeAttributeNameFromTo("onmouseenter", hoverOrClickAttributeName);
+	  }
+
+	  chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio', 'fdStatus', 'b1Status', 'ftStatus',
+								'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
+								'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
+		if (idWhichTrue != null)
+			idWhichTrue = [];
+		if (variable.fdStatus == true)
+			idWhichTrue.push("fd");
+		if (variable.ftStatus == true)
+			idWhichTrue.push("ft");
+		if (variable.fsStatus == true)
+			idWhichTrue.push("fs");
+		if (variable.ntStatus == true)
+			idWhichTrue.push("nt");
+		if (variable.nsStatus == true)
+			idWhichTrue.push("ns");
+
+		if (variable.b1Status == true)
+			idWhichTrue.push("b1");
+		if (variable.b2Status == true)
+			idWhichTrue.push("b2");
+		if (variable.b3Status == true)
+			idWhichTrue.push("b3");
+		if (variable.b4Status == true)
+			idWhichTrue.push("b4");
+		if (variable.b5Status == true)
+			idWhichTrue.push("b5");
+	  });
+	  console.log("idWhichTrue: " + idWhichTrue);
+
+	  try {
+	  	if (idOrder != null)
+				idOrder = [];
+
+		  for (let i = 0; i < request.currentHTMLKey.length; i++) {
+			if (request.currentHTMLKey.substring(i, i+2) == "id") {
+				//console.log("found an id: " + request.currentHTMLKey.substring(i+4, i+6));
+				idOrder.push(request.currentHTMLKey.substring(i+4, i+6));
+			}
+		  }
+		  console.log("idOrder: " + idOrder);
+	  }
+	  catch (exception_var) {
+      	console.log(exception_var);
+      }
     }
 );
 
@@ -241,6 +337,30 @@ try {
 catch (exception_var) {
 	console.log(exception_var);
 }
+
+function changeAttributeNameFromTo(originalAttributeName, newAttributeName) {
+	try {
+
+		for (let i = 0; i < ToWrd.length; i++) {
+			if (!ToWrd[i].innerHTML.includes("sLang_")) {
+				ToWrd[i].outerHTML = ToWrd[i].outerHTML.replace(originalAttributeName, newAttributeName);
+			}
+		}
+		for (i = 0; i < exampleSentences.length; i++) {
+			exampleSentences[i].outerHTML = exampleSentences[i].outerHTML.replace(originalAttributeName, newAttributeName);
+		}
+		for (i = 0; i < pos2_tooltip.length; i++) {
+			pos2_tooltip[i].outerHTML = pos2_tooltip[i].outerHTML.replace(originalAttributeName, newAttributeName);
+		}
+		for (i = 0; i < dsense.length; i++) {
+			dsense[i].outerHTML = dsense[i].outerHTML.replace(originalAttributeName, newAttributeName);
+		}
+	}
+	catch (exception_var) {
+		console.log(exception_var);
+	}
+}
+
 function removeDataPh(number) {
 	return !number.outerHTML.includes("data-ph");
 }
@@ -271,13 +391,13 @@ catch (exception_var) {
 function removeDefinitions() {
 	try {
         for (i = 0; i < definitions.length; i++) {
-			definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions[i].innerHTML) + "';");
+			definitions[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(definitions[i].innerHTML) + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
 			definitions[i].innerHTML = "[...]";
         }
         for (i = 0; i < exampleSentences.length; i++) {
         	textThatIsBeingReplaced = equalLengthBrackets(exampleSentences[i].innerHTML.replace(/<\/?[^>]+(>|$)/g, ""));
-			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences[i].innerHTML) + "';");
+			exampleSentences[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences[i].innerHTML) + "';");
 			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + textThatIsBeingReplaced + "';");
 			exampleSentences[i].innerHTML = textThatIsBeingReplaced;
 		}
@@ -285,7 +405,7 @@ function removeDefinitions() {
 			pos2_tooltip[i].innerHTML = "";
 		}
 		for (i = 0; i < dsense.length; i++) {
-			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(def) + "';");
+			dsense[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(def) + "';");
 			dsense[i].setAttribute("onmouseleave", "this.innerHTML=''");
 			dsense[i].setAttribute("style", "text-align:right");
 			dsense[i].innerHTML = "";
@@ -303,22 +423,22 @@ function restoreDefinitions() {
 	try {
         for (i = 0; i < definitions.length; i++) {
         	definitions[i].innerHTML = definitions2[i];
-        	definitions[i].setAttribute("onmouseenter", "this.innerHTML='" + definitions2[i] + "';");
+        	definitions[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + definitions2[i] + "';");
 			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + definitions2[i] + "';");
         }
         for (i = 0; i < exampleSentences.length; i++) {
 			exampleSentences[i].innerHTML = exampleSentences2[i];
-			exampleSentences[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
+			exampleSentences[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
             exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = pos2_tooltip_2[i];
-			pos2_tooltip[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(pos2_tooltip_2[i]) + "';");
+			pos2_tooltip[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(pos2_tooltip_2[i]) + "';");
 			pos2_tooltip[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(pos2_tooltip_2[i]) + "';");
 		}
 		for (i = 0; i < dsense.length; i++) {
 			dsense[i].innerHTML = dsense2[i];
-			dsense[i].setAttribute("onmouseenter", "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
+			dsense[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
 			dsense[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
 		}
 		console.log("restored definitions: " + definitions2.length + ", removed restored: " + exampleSentences2.length +
@@ -355,6 +475,9 @@ try {
 		}
 		if (tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")) {
 			isSomethingImportantMissingRowIndexes.push(k);
+		}
+		if (tableRow[k].outerHTML.includes("class=\"ToEx\"")) {
+			exampleSentenceRowIndexes.push(k);
 		}
 	}
 	strongRowIndexes.shift();
@@ -500,7 +623,8 @@ try {
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
 	nativeExampleSentenceIndexes.shift();
-	/**
+	exampleSentenceRowIndexes.shift();
+
 	// add an additional row to account for "is something missing" sentence
 	tableRowIndexes.push(tableRowIndexes[tableRowIndexes.length-1]+1);
 	console.log("--------");
@@ -533,7 +657,23 @@ try {
 	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
-	**/
+
+	// fill up foreignTranslations, nativeTranslations, etc
+	for (let k = tableRowIndexes[0]; k < tableRowIndexes[tableRowIndexes.length-1]; k++) {
+		//console.log("pay attention here");
+		if (strongRowIndexes.includes(k)) {
+			console.log("foreignDefinitions: " + strong[k].textContent);
+			console.log("foreignTranslations: " + tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")");
+		}
+		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">")) {
+			console.log("nativeTranslations: " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+		}
+		console.log("foreignSentences: " + nativeExampleSentences[k].textContent);
+		if (exampleSentenceRowIndexes.includes(k)) {
+			console.log("nativeSentences: " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].substring(3).split("</span>")[0].split("<")[0]);
+		}
+	}
+	// copy button
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
 			tempK = k;

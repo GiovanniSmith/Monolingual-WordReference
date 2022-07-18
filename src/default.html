@@ -10,6 +10,9 @@
 <body>
     <hr>
     <button id="toggleDefinitions" class="toggle">Toggle all definitions</button>
+    <button id="toggleCopy" class="toggle">Toggle copy button</button>
+    <button class="accordion">Advanced settings</button>
+    <div class="panel">
         <a>
             When does a definition get shown?<br>
             <input type="radio" id="radio1" name="rad" value="0" checked="checked">
@@ -17,30 +20,74 @@
             <input type="radio" id="radio2" name="rad" value="0">
             <label for="radio2">Click</label><br>
         </a>
-    <hr>
-    <button id="toggleCopy" class="toggle">Toggle copy button</button>
-    <a>What gets copied?</a>
-    <br>
-    <div class="wrapper" id="wrapperId">
-        <div class="item" id="fwRegion">
-            <input class = "text" type="checkbox" id="fw">
-            <label class = "text" for="fw">Foreign word</label><br>
-            <i class="fas fa-bars"></i>
+        <div id="warningForClick">
+            <aRed>Warning: for click to work properly, go to
+                <a href="https://www.wordreference.com/2012/preferences.aspx" target="_blank"> WordReference's preferences</a>
+                and set "click on word" to "does nothing."
+            </aRed>
+            <br>
+            <button class="small" id="dontShowAgainButton">Ok</button>
+            <input class = "text" type="checkbox" id="dontShowAgainButtonCheck">
+            <label class = "text" for="dontShowAgainButtonCheck">Don't show again</label><br>
         </div>
-        <div class="item" id="fdRegion">
-            <input class = "text" type="checkbox" id="fd">
-            <label class = "text" for="fd">Foreign definition</label><br>
-            <i class="fas fa-bars"></i>
+        <hr>
+        <a>What gets copied?</a>
+        <br>
+        <div class="wrapper" id="wrapperId">
+            <div class="item">
+                <input class = "text" type="checkbox" id="fd">
+                <label class = "text" for="fd">Foreign definition</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="b1">
+                <label class = "text" for="b1">(space)</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="ft">
+                <label class = "text" for="ft">Foreign translation</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="b2">
+                <label class = "text" for="b2">(space)</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="fs">
+                <label class = "text" for="fs">Foreign sentence</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="b3">
+                <label class = "text" for="b3">(space)</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="nt">
+                <label class = "text" for="nt">Native translation</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="b4">
+                <label class = "text" for="b4">(space)</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="ns">
+                <label class = "text" for="ns">Native sentence</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="item">
+                <input class = "text" type="checkbox" id="b5">
+                <label class = "text" for="b5">(space)</label><br>
+                <i class="fas fa-bars"></i>
+            </div>
         </div>
-        <div class="item" id="fsRegion">
-            <input class = "text" type="checkbox" id="fs">
-            <label class = "text" for="fs">Foreign sentence</label><br>
-            <i class="fas fa-bars"></i>
-        </div>
+        <button class="save" id="saveChanges">Save copy order</button>
+        <aRed id="warning"></aRed>
     </div>
-    <br>
-    <button id="saveChanges" class="save">Save checkbox order</button>
-    <aRed id="warning"></aRed>
     <hr>
     <a href="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ" target="_blank">Donate</a>
     <a href="https://github.com/Giospiral/Monolingual-WordReference" target="_blank">Github</a>

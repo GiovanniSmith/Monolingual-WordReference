@@ -68,6 +68,18 @@ button.toggle:active {
 	background-color: #c77123;
 }
 
+button.toggleGrayedOut {
+  background-color: #9b9b9b;
+  color: white;
+  padding: 5px 5px;
+  font-size: 18px;
+  font-family: Cabin;
+  cursor: context-menu;
+  width:230px;
+  height:60px;
+  text-shadow: 0px 1px #000000;
+}
+
 button.move {
   background-color: #7a7a7a;
   border: 3;
@@ -104,6 +116,26 @@ button.save:hover {
   	background-color: #ffaa5e;
 }
 button.save:active {
+	background-color: #c77123;
+}
+
+button.small {
+  background-color: #FE902D;
+  border: 3;
+  border-color: white;
+  color: white;
+  padding: 2px 2px;
+  font-size: 12px;
+  font-family: Cabin;
+  cursor: pointer;
+  width:40px;
+  height:24px;
+  text-shadow: 0px 1px #000000;
+}
+button.small:hover {
+  	background-color: #ffaa5e;
+}
+button.small:active {
 	background-color: #c77123;
 }
 
@@ -271,4 +303,55 @@ body{
   /**font-size: 18px;**/
   cursor: pointer;
   font-size: 5px;
+}
+/** ----------- **/
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+  background-color: #5e58c6;
+  cursor: pointer;
+  padding: 5px;
+  width: 100%;
+  text-align: center;
+  border: outset;
+  outline: none;
+  transition: 0.1s;
+  color: white;
+  font-size: 15px;
+  font-family: Cabin;
+  border-color: white;
+  text-shadow: 0px 1px #000000;
+}
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .accordion:hover {
+  background-color: #6E67E5;
+}
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+  padding: 0 15px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease-out;
+}
+
+.active, .accordion:active {
+  background-color: #393577;
+}
+
+.accordion:after {
+/*
+  content: '\9660';
+  font-size: 13px;
+  color: white;
+  float: right;
+  margin-left: 5px;
+  vertical-align: text-bottom;
+*/
+}
+
+.active:after {
+/*
+  content: "\9650";
+*/
 }
