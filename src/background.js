@@ -28,8 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
 	var b4 = document.getElementById('b4');
 	var ns = document.getElementById('ns');
 	var b5 = document.getElementById('b5');
+
 	var saveChanges = document.getElementById('saveChanges');
 	var warningForClick = document.getElementById('warningForClick');
+
+	const sendMessageButton = document.getElementById('toggleDefinitions');
+	const sendMessageButton2 = document.getElementById('toggleCopy');
 
 	chrome.storage.local.get(['radio', 'fdStatus', 'b1Status', 'ftStatus',
 						   	'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
@@ -48,7 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			console.log("HTML updated");
 		} else {
 			chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
-
+			chrome.storage.local.set({ftStatus: true}, function() {});
+			chrome.storage.local.set({b2Status: true}, function() {});
+			chrome.storage.local.set({fsStatus: true}, function() {});
 		}
 
 		document.getElementById("fd").checked = variable.fdStatus;
@@ -63,12 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("b4").checked = variable.b4Status;
 		document.getElementById("b5").checked = variable.b5Status;
 
+		saveChanges.click();
 	});
+
 
 	saveChanges.onclick = async function(e) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		console.log("saveChanges clicked");
-		var whichTagsAreChecked = [];
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
@@ -77,23 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
 									  'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 							        	'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
 				chrome.tabs.sendMessage(tabs[0].id, {currentHTMLKey: variable.currentHTML}, function(response) {});
-				/**
-				chrome.tabs.sendMessage(tabs[0].id, {fdStatusKey: variable.fdStatus}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {ftStatusKey: variable.ftStatus}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {fsStatusKey: variable.fsStatus}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {ntStatusKey: variable.ntStatus}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {nsStatusKey: variable.nsStatus}, function(response) {});
 
-				chrome.tabs.sendMessage(tabs[0].id, {b1StatusKey: variable.b1Status}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {b2StatusKey: variable.b2Status}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {b3StatusKey: variable.b3Status}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {b4StatusKey: variable.b4Status}, function(response) {});
-				chrome.tabs.sendMessage(tabs[0].id, {b5StatusKey: variable.b5Status}, function(response) {});
-				**/
 			});
 		});
 	}
-
 	radio1.onclick = async function(e) {
 		chrome.storage.local.set({radio: "radio1"}, function() {});
 
@@ -122,8 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			});
 		});
 	}
-
-	const sendMessageButton = document.getElementById('toggleDefinitions');
     sendMessageButton.onclick = async function(e) {
         let queryOptions = { active: true, currentWindow: true };
         let tab = await chrome.tabs.query(queryOptions);
@@ -134,8 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-
-    const sendMessageButton2 = document.getElementById('toggleCopy');
 	sendMessageButton2.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
@@ -166,6 +156,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 	}
 	warningCheck();
 
+
 	dontShowAgainButton.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
@@ -187,6 +178,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 				chrome.storage.local.set({fdStatus: fd.checked}, function() {});
 				warningCheck();
 				console.log("fdStatus: " + variable.fdStatus);
+				saveChanges.click();
 			});
 		});
 	}
@@ -197,6 +189,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 			chrome.storage.local.get(['ftStatus'], function(variable) {
 				chrome.storage.local.set({ftStatus: ft.checked}, function() {});
 				warningCheck();
+				saveChanges.click();
 			});
 		});
 	}
@@ -207,6 +200,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 			chrome.storage.local.get(['fsStatus'], function(variable) {
 				chrome.storage.local.set({fsStatus: fs.checked}, function() {});
 				warningCheck();
+				saveChanges.click();
 			});
 		});
 	}
@@ -217,6 +211,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 			chrome.storage.local.get(['ntStatus'], function(variable) {
 				chrome.storage.local.set({ntStatus: nt.checked}, function() {});
 				warningCheck();
+				saveChanges.click();
 			});
 		});
 	}
@@ -227,6 +222,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 			chrome.storage.local.get(['nsStatus'], function(variable) {
 				chrome.storage.local.set({nsStatus: ns.checked}, function() {});
 				warningCheck();
+				saveChanges.click();
 			});
 		});
 	}
@@ -237,7 +233,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b1Status'], function(variable) {
 				chrome.storage.local.set({b1Status: b1.checked}, function() {});
-
+				saveChanges.click();
 			});
 		});
 	}
@@ -247,7 +243,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b2Status'], function(variable) {
 				chrome.storage.local.set({b2Status: b2.checked}, function() {});
-
+				saveChanges.click();
 			});
 		});
 	}
@@ -257,7 +253,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b3Status'], function(variable) {
 				chrome.storage.local.set({b3Status: b3.checked}, function() {});
-
+				saveChanges.click();
 			});
 		});
 	}
@@ -267,7 +263,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b4Status'], function(variable) {
 				chrome.storage.local.set({b4Status: b4.checked}, function() {});
-
+				saveChanges.click();
 			});
 		});
 	}
@@ -277,7 +273,7 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b5Status'], function(variable) {
 				chrome.storage.local.set({b5Status: b5.checked}, function() {});
-
+				saveChanges.click();
 			});
 		});
 	}

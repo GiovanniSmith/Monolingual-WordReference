@@ -9,7 +9,6 @@
       <change beforePath="$PROJECT_DIR$/src/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/default.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/default.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/defaultStyles.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/defaultStyles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/toggleDefinitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/toggleDefinitions.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

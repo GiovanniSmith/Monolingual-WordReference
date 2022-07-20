@@ -20,6 +20,11 @@ a {
 	user-select: none;
 	text-shadow: 0px 1px #000000;
 }
+aSmall {
+    color: #bbb;
+	font-size: 4px;
+	text-shadow: 0px 1px #000000;
+}
 a2 {
     color: white;
 	font-weight: bold;
@@ -254,7 +259,41 @@ body{
   color: #fff;
   display: flex;
   margin-bottom: 0px;
-  padding: 2px 5px;
+  padding: 1px 2px;
+  background: #304B5F;
+  border-radius: 3px;
+  align-items: center;
+  justify-content: space-between;
+  /**font-size: 12px;**/
+  font-family: Cabin;
+  text-shadow: 0px 1px #000000;
+  background-color: #5e58c6;
+}
+.wrapper .item:last-child{
+  margin-bottom: 0px;
+}
+.wrapper .item: hover{
+  background-color: #000000;
+}
+.wrapper .item .text{
+  /**font-size: 18px;**/
+  /**font-weight: 400;**/
+  font-size: 6px;
+}
+.wrapper .item .textSmall{
+  font-size: 6px;
+  /**font-weight: 400;**/
+}
+.wrapper .item i{
+  /**font-size: 18px;**/
+  cursor: pointer;
+}
+
+.wrapper .itemGray{
+  color: #bbb;
+  display: flex;
+  margin-bottom: 0px;
+  padding: 1px 2px;
   background: #304B5F;
   border-radius: 3px;
   align-items: center;
@@ -264,45 +303,16 @@ body{
   text-shadow: 0px 1px #000000;
   background-color: #5e58c6;
 }
-.wrapper .item:last-child{
-  margin-bottom: 0px;
-}
-.wrapper .item .text{
-  /**font-size: 18px;**/
-  /**font-weight: 400;**/
-}
-.wrapper .item i{
-  /**font-size: 18px;**/
-  cursor: pointer;
-}
-
-.wrapper .itemGray{
-  color: #bbbbbb;
-  display: flex;
-  margin-bottom: 0px;
-  padding: 0px 0px;
-  background: #304B5F;
-  border-radius: 3px;
-  align-items: left;
-  justify-content: center;
-  font-size: 5px;
-  font-family: Cabin;
-  text-shadow: 0px 1px #000000;
-  background-color: #5e58c6;
-}
 .wrapper .itemGray:last-child{
   margin-bottom: 0px;
-  font-size: 5px;
 }
 .wrapper .itemGray .text{
   /**font-size: 18px;**/
   /**font-weight: 400;**/
-  font-size: 5px;
 }
 .wrapper .itemGray i{
   /**font-size: 18px;**/
   cursor: pointer;
-  font-size: 5px;
 }
 /** ----------- **/
 /* Style the buttons that are used to open and close the accordion panel */
