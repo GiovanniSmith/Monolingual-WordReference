@@ -20,9 +20,29 @@ a {
 	user-select: none;
 	text-shadow: 0px 1px #000000;
 }
+aRight {
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 10px;
+	text-align: right;
+	user-select: none;
+	text-shadow: 0px 1px #000000;
+}
+aSelect {
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 10px;
+	text-align: center;
+	text-shadow: 0px 1px #000000;
+}
 aSmall {
-    color: #bbb;
-	font-size: 4px;
+    color: white;
+	font-weight: bold;
+	font-family: Cabin;
+	font-size: 8px;
+	text-align: center;
 	text-shadow: 0px 1px #000000;
 }
 a2 {
@@ -141,6 +161,25 @@ button.small:hover {
   	background-color: #ffaa5e;
 }
 button.small:active {
+	background-color: #c77123;
+}
+
+button.small2 {
+  background-color: #FE902D;
+  border: 3;
+  border-color: white;
+  color: white;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-family: Cabin;
+  cursor: pointer;
+  height:24px;
+  text-shadow: 0px 1px #000000;
+}
+button.small2:hover {
+  	background-color: #ffaa5e;
+}
+button.small2:active {
 	background-color: #c77123;
 }
 

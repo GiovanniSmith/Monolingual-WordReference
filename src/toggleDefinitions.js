@@ -1,17 +1,23 @@
-var buttons;
-var copyIndex;
-var j;
-var tempArray = [];
-var firstHalf;
-var secondHalf;
 var copyStatus = false;
-// didn't do ca
+var copyButtonExists = false;
+var onFirstRow = false;
+var doesSecondOpenParenthesisExist = false;
+var noExampleSentenceForDefinition = false;
+var definitionOnlyTakesUpOneRow = false;
+var fdExists = true;
+var ftExists = true;
+var fsExists = true;
+var ntExists = true;
+var nsExists = true;
+var isTextHidden = true;
+var isClickSelected = false;
+var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 var languageAbbreviations = ["en", "es", "fr", "pt", "it", "de", "nl", "sv", "ru",
-							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];
+							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];// didn't do ca
 var languageCombinations = [];
 var ToWrd = [];
 var languageCombinationInPage;
-var nativeExampleSentences;
+var FrEx;
 var FrWrd;
 var tableRow;
 var tableRowIndexes = [];
@@ -33,21 +39,10 @@ var nativeExampleSentenceRowIndexesCount;
 var notePublRowIndexes = [];
 var notePublRowTouchingStrongIndexes = [];
 var tempK = 0;
-var kCount = 0;
-var clipboardArray;
-var tableRowTemporary;
-var copyButtonExists = false;
-var onFirstRow = false;
-var checkbox1Enabled;
-var checkbox2Enabled;
-var headerRow;// only for headers that aren't the first one
 var headerRowIndexes = [];
 var headerRowOffsetCount = 0;
-var findNativeExampleSentenceCounter;
-var clipboardSingleElement;
-var clipboardArrayWithHTML;
-var definitions, exampleSentences, helperDefinitions, dsense, pos2_tooltip, ph, dataPh, notePubl, isSomethingImportantMissing;
-definitions = [];
+var ToWrdDef, ToEx, To2, dsense, pos2_tooltip, ph, dataPh, notePubl, isSomethingImportantMissing;
+ToWrdDef = [];
 var definitions2 = [];
 var exampleSentences2 = [];
 var helperDefinitions2 = [];
@@ -61,48 +56,21 @@ var dataPh2 = [];
 var isSomethingImportantMissing = [];
 var isSomethingImportantMissingRowIndexes = [];
 var escucharButton;
-var i = 0;
 var def = "";
-var even;
-var odd;
-var doesSecondOpenParenthesisExist = false;
-var noExampleSentenceForDefinition = false;
-var deleteThisLater = 3;
-var keybindPressed = false;
-var kCountUntilNativeExampleSentenceFound;
-var newRowVariable;
 var countNewRows = 0;
 var countNewRowsSentence = 0;
 var countNewRowsNotes = 0;
 var modifiedRows = [];
 var htmlThatButtonRemoved = "";
 var currentRowTheCopyButtonIsOn;
-var definitionOnlyTakesUpOneRow = false;
 var textThatIsBeingReplaced = "";
-var idOrder = [];
-var idWhichTrue = [];
-var hoverOrClickAttributeName = "onmouseenter";
+var idOrder = ["fd","b1","ft","b2","fs","b3","nt","b4","ns","b5"];
+var idWhichTrue = ["ft","b2","fs"];
+var hoverOrClickAttributeName = "onclick";
 var exampleSentenceRowIndexes = [];
-
-var foreignDefinitions = [""];
-var foreignTranslations = [""];
-var foreignSentences = [""];
-var nativeTranslations = [""];
-var nativeSentences = [""];
 
 var nativeTranslationsRowIndexes = [];
 var nativeSentencesRowIndexes = [];
-
-var fdExists = true;
-var ftExists = true;
-var fsExists = true;
-var ntExists = true;
-var nsExists = true;
-
-var isTextHidden = true;
-var isClickSelected = false;
-
-var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
@@ -201,9 +169,9 @@ for (let i = 0; i < languageAbbreviations.length; i++) {
     }
 }
 // have the status of toggleDefinitions and toggleCopy change when the respective button is clicked
-chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio', 'fdStatus', 'b1Status', 'ftStatus',
+chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Status', 'ftStatus',
 						'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
-						'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
+						'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded'], function(variable) {
 	if (variable.toggleDefinitions == null) {
 		chrome.storage.local.set({toggleDefinitions: false}, function() {});
 		restoreDefinitions();
@@ -226,83 +194,8 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio', 'fdStatus'
 		copyStatus = true;
 	}
 
-	if (variable.radio == "radio1") {
-		hoverOrClickAttributeName = "onmouseenter";
-		changeAttributeNameFromTo("onclick", hoverOrClickAttributeName);
-		isClickSelected = false;
-	} else if (variable.radio == "radio2") {
-		hoverOrClickAttributeName = "onclick";
-		changeAttributeNameFromTo("onmouseenter", hoverOrClickAttributeName);
-		isClickSelected = true;
-	}
-
-	if (idWhichTrue != null)
+	if (idWhichTrue != null && variable.hasDOMeverBeenLoaded != null) {
 		idWhichTrue = [];
-	if (variable.fdStatus == true)
-		idWhichTrue.push("fd");
-	if (variable.ftStatus == true)
-		idWhichTrue.push("ft");
-	if (variable.fsStatus == true)
-		idWhichTrue.push("fs");
-	if (variable.ntStatus == true)
-		idWhichTrue.push("nt");
-	if (variable.nsStatus == true)
-		idWhichTrue.push("ns");
-
-	if (variable.b1Status == true)
-		idWhichTrue.push("b1");
-	if (variable.b2Status == true)
-		idWhichTrue.push("b2");
-	if (variable.b3Status == true)
-		idWhichTrue.push("b3");
-	if (variable.b4Status == true)
-		idWhichTrue.push("b4");
-	if (variable.b5Status == true)
-		idWhichTrue.push("b5");
-
-	if (idOrder != null)
-		idOrder = [];
-	  for (let i = 0; i < variable.currentHTML.length; i++) {
-		if (variable.currentHTML.substring(i, i+2) == "id") {
-			idOrder.push(variable.currentHTML.substring(i+4, i+6));
-		}
-	  }
-
-	console.log("idWhichTrue: " + idWhichTrue);
-	console.log("idOrder: " + idOrder);
-
-});
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      if (request.toggleDefinitionsKey == true) {
-      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
-      	removeDefinitions();
-      } else if (request.toggleDefinitionsKey == false) {
-      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
-      	restoreDefinitions();
-      }
-	  if (request.toggleCopyKey == true) {
-	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
-	  	copyStatus = true;
-	  } else if (request.toggleCopyKey == false) {
-	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
-	  	copyStatus = false;
-	  }
-	  if (request.radioKey == "radio1") {
-	  	hoverOrClickAttributeName = "onmouseenter";
-	  	changeAttributeNameFromTo("onclick", hoverOrClickAttributeName);
-	  	isClickSelected = false;
-	  } else if (request.radioKey == "radio2") {
-	  	hoverOrClickAttributeName = "onclick";
-	  	changeAttributeNameFromTo("onmouseenter", hoverOrClickAttributeName);
-	  	isClickSelected = true;
-	  }
-
-	  chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'radio', 'fdStatus', 'b1Status', 'ftStatus',
-								'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
-								'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
-		if (idWhichTrue != null)
-			idWhichTrue = [];
 		if (variable.fdStatus == true)
 			idWhichTrue.push("fd");
 		if (variable.ftStatus == true)
@@ -324,28 +217,114 @@ chrome.runtime.onMessage.addListener(
 			idWhichTrue.push("b4");
 		if (variable.b5Status == true)
 			idWhichTrue.push("b5");
+	}
 
-		if (idOrder != null)
-			idOrder = [];
-		  for (let i = 0; i < variable.currentHTML.length; i++) {
+	if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
+		idOrder = [];
+		for (let i = 0; i < variable.currentHTML.length; i++) {
 			if (variable.currentHTML.substring(i, i+2) == "id") {
 				idOrder.push(variable.currentHTML.substring(i+4, i+6));
 			}
 		  }
+	}
+
+	console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
+});
+/**
+try {
+	const tableRowPermanent = document.getElementsByTagName("tr");
+	for (let k = 3; k < tableRowIndexes[tableRowIndexes.length-1]; k++) {
+		if (tableRowPermanent[k].outerHTML.includes("<strong>") && !tableRowPermanent[k].outerHTML.includes("Traducciones Principales")) {
+			console.log("(1) foreignDefinitions: " + tableRowPermanent[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, ''));
+			console.log("(2) foreignTranslations: " + (tableRowPermanent[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+		}
+		if (tableRowPermanent[k].outerHTML.includes("class=\"dsense\"")) {
+			console.log("(2.5) helper nativeTranslations: " + tableRowPermanent[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+		}
+		if (tableRowPermanent[k].outerHTML.includes("<td class=\"ToWrd\">")) {
+			console.log("(3) nativeTranslations: " + tableRowPermanent[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+		}
+		if (tableRowPermanent[k].outerHTML.includes("class=\"FrEx\">")) {
+			console.log("(4) foreignSentences: " + tableRowPermanent[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
+		}
+		if (tableRowPermanent[k].outerHTML.includes("class=\"ToEx\">")) {
+			console.log("(5) nativeSentences: " + tableRowPermanent[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+		}
+	}
+}
+catch (exception_var) {
+	console.log("asdsaasdasdasd");
+	console.log(exception_var);
+}
+**/
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      if (request.toggleDefinitionsKey == true) {
+      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
+      	removeDefinitions();
+      } else if (request.toggleDefinitionsKey == false) {
+      	chrome.storage.local.set({toggleDefinitions: !request.toggleDefinitionsKey}, function() {});
+      	restoreDefinitions();
+      }
+	  if (request.toggleCopyKey == true) {
+	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
+	  	copyStatus = true;
+	  } else if (request.toggleCopyKey == false) {
+	  	chrome.storage.local.set({toggleCopy: !request.toggleCopyKey}, function() {});
+	  	copyStatus = false;
+	  }
+
+	  chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Status', 'ftStatus',
+								'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
+								'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded'], function(variable) {
+		if (idWhichTrue != null && variable.hasDOMeverBeenLoaded != null) {
+			idWhichTrue = [];
+			if (variable.fdStatus == true)
+				idWhichTrue.push("fd");
+			if (variable.ftStatus == true)
+				idWhichTrue.push("ft");
+			if (variable.fsStatus == true)
+				idWhichTrue.push("fs");
+			if (variable.ntStatus == true)
+				idWhichTrue.push("nt");
+			if (variable.nsStatus == true)
+				idWhichTrue.push("ns");
+
+			if (variable.b1Status == true)
+				idWhichTrue.push("b1");
+			if (variable.b2Status == true)
+				idWhichTrue.push("b2");
+			if (variable.b3Status == true)
+				idWhichTrue.push("b3");
+			if (variable.b4Status == true)
+				idWhichTrue.push("b4");
+			if (variable.b5Status == true)
+				idWhichTrue.push("b5");
+		}
+
+
+		if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
+			idOrder = [];
+			for (let i = 0; i < variable.currentHTML.length; i++) {
+				if (variable.currentHTML.substring(i, i+2) == "id") {
+					idOrder.push(variable.currentHTML.substring(i+4, i+6));
+				}
+			}
+		}
 	  });
-	  console.log("idOrder: " + idOrder);
-	  console.log("idWhichTrue: " + idWhichTrue);
+	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
     }
 );
 
 try {
 	ToWrd = document.getElementsByClassName('ToWrd');
-	exampleSentences = document.getElementsByClassName("ToEx");
-	helperDefinitions = document.getElementsByClassName("To2");
+	ToEx = document.getElementsByClassName("ToEx");
+	To2 = document.getElementsByClassName("To2");
 	dsense = document.getElementsByClassName("dsense");
 	pos2_tooltip = document.getElementsByClassName("POS2 tooltip");
 
-	nativeExampleSentences = document.getElementsByClassName("FrEx");
+	FrEx = document.getElementsByClassName("FrEx");
 	FrWrd = document.getElementsByClassName("FrWrd");
 	tableRow = document.getElementsByTagName("tr");
 	tableData = document.getElementsByTagName("td");
@@ -357,7 +336,7 @@ try {
 
 	for (i = 0; i < ToWrd.length; i++) {
 		if (!ToWrd[i].innerHTML.includes("sLang_")) {
-			definitions.push(ToWrd[i]);
+			ToWrdDef.push(ToWrd[i]);
 		}
 	}
 }
@@ -365,45 +344,16 @@ catch (exception_var) {
 	console.log(exception_var);
 }
 
-function changeAttributeNameFromTo(originalAttributeName, newAttributeName) {
-	/**
-	for (let i = 0; i < ToWrd.length; i++) {
-		if (!ToWrd[i].innerHTML.includes("sLang_")) {
-			ToWrd[i].outerHTML = ToWrd[i].outerHTML.replace(originalAttributeName, newAttributeName);
-		}
-	}
-	**/
-
-	try {
-		for (i = 0; i < definitions.length; i++) {// no parent node. append instead?
-			definitions[i].outerHTML = definitions[i].outerHTML.replace(originalAttributeName, newAttributeName);
-		}
-	}
-	catch (exception_var) {console.log("changeAttributeNameFromTo: " + exception_var);}
-	try {
-		for (i = 0; i < exampleSentences.length; i++) {
-			exampleSentences[i].outerHTML = exampleSentences[i].outerHTML.replace(originalAttributeName, newAttributeName);
-		}
-		for (i = 0; i < pos2_tooltip.length; i++) {
-			pos2_tooltip[i].outerHTML = pos2_tooltip[i].outerHTML.replace(originalAttributeName, newAttributeName);
-		}
-		for (i = 0; i < dsense.length; i++) {
-			dsense[i].outerHTML = dsense[i].outerHTML.replace(originalAttributeName, newAttributeName);
-		}
-	}
-	catch (exception_var) {console.log(exception_var);}
-}
-
 function removeDataPh(number) {
 	return !number.outerHTML.includes("data-ph");
 }
 // fill up the second array beforehand to ensure that later on, the first array doesn't draw from an empty array
 try {
-	for (i = 0; i < definitions.length; i++) {
-		definitions2.push(definitions[i].innerHTML);
+	for (i = 0; i < ToWrdDef.length; i++) {
+		definitions2.push(ToWrdDef[i].innerHTML);
 	}
-	for (i = 0; i < exampleSentences.length; i++) {
-		exampleSentences2.push(exampleSentences[i].innerHTML);
+	for (i = 0; i < ToEx.length; i++) {
+		exampleSentences2.push(ToEx[i].innerHTML);
 	}
 	for (i = 0; i < pos2_tooltip.length; i++) {
 		pos2_tooltip_2.push(pos2_tooltip[i].innerHTML);
@@ -419,16 +369,15 @@ catch (exception_var) {
 function removeDefinitions() {
 	try {
 		isTextHidden = true;
-        for (i = 0; i < definitions.length; i++) {
-			definitions[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(definitions[i].innerHTML) + "';");
-			definitions[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
-			definitions[i].innerHTML = "[...]";
+        for (i = 0; i < ToWrdDef.length; i++) {
+			ToWrdDef[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(ToWrdDef[i].innerHTML) + "';");
+			ToWrdDef[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
+			ToWrdDef[i].innerHTML = "[...]";
         }
-        for (i = 0; i < exampleSentences.length; i++) {
-        	textThatIsBeingReplaced = equalLengthBrackets(exampleSentences[i].innerHTML.replace(/<\/?[^>]+(>|$)/g, ""));
-			exampleSentences[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences[i].innerHTML) + "';");
-			exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + textThatIsBeingReplaced + "';");
-			exampleSentences[i].innerHTML = textThatIsBeingReplaced;
+        for (i = 0; i < ToEx.length; i++) {
+			ToEx[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(ToEx[i].innerHTML) + "';");
+			ToEx[i].setAttribute("onmouseleave", "this.innerHTML='[...]';");
+			ToEx[i].innerHTML = "[...]";
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = "";
@@ -439,7 +388,7 @@ function removeDefinitions() {
 			dsense[i].setAttribute("style", "text-align:right");
 			dsense[i].innerHTML = "";
 		}
-		console.log("removed definitions: " + definitions.length + ", removed exampleSentences: " + exampleSentences.length +
+		console.log("removed ToWrdDef: " + ToWrdDef.length + ", removed ToEx: " + ToEx.length +
 					", removed pos2_tooltip: " + pos2_tooltip.length + ", removed dsense: " + dsense.length);
     }
     catch (exception_var) {
@@ -450,19 +399,19 @@ function removeDefinitions() {
 function restoreDefinitions() {
 	try {
 		isTextHidden = false;
-        for (i = 0; i < definitions.length; i++) {
-        	definitions[i].innerHTML = definitions2[i];
+        for (i = 0; i < ToWrdDef.length; i++) {
+        	ToWrdDef[i].innerHTML = definitions2[i];
         	/**
         	if (isClickSelected && !isTextHidden) {
-				definitions[i].outerHTML = definitions[i].outerHTML.replace("onclick", "onmouseenter");
+				ToWrdDef[i].outerHTML = ToWrdDef[i].outerHTML.replace("onclick", "onmouseenter");
 			}**/
-        	definitions[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
-			definitions[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
+        	ToWrdDef[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
+			ToWrdDef[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
         }
-        for (i = 0; i < exampleSentences.length; i++) {
-			exampleSentences[i].innerHTML = exampleSentences2[i];
-			exampleSentences[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
-            exampleSentences[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(exampleSentences2[i]) + "';");
+        for (i = 0; i < ToEx.length; i++) {
+			ToEx[i].innerHTML = exampleSentences2[i];
+			ToEx[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeDoubleApostrophe(addBackslashBeforeApostrophe(exampleSentences2[i])) + "';");
+            ToEx[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeDoubleApostrophe(addBackslashBeforeApostrophe(exampleSentences2[i])) + "';");
 		}
 		for (i = 0; i < pos2_tooltip.length; i++) {
 			pos2_tooltip[i].innerHTML = pos2_tooltip_2[i];
@@ -474,7 +423,7 @@ function restoreDefinitions() {
 			dsense[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
 			dsense[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(dsense2[i]) + "';");
 		}
-		console.log("restored definitions: " + definitions2.length + ", restored exampleSentences: " + exampleSentences2.length +
+		console.log("restored ToWrdDef: " + definitions2.length + ", restored ToEx: " + exampleSentences2.length +
         					", restored pos2_tooltip: " + pos2_tooltip_2.length + ", restored dsense: " + dsense2.length);
     }
     catch (exception_var) {
@@ -490,7 +439,6 @@ try {
 
 	}
 	**/
-
 	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {
 			nativeExampleSentenceRowIndexes.push(k);
@@ -525,13 +473,13 @@ try {
     nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
     notePublRowIndexes.shift();
     isSomethingImportantMissingRowIndexes.shift();
-	/**
+
 	console.log("isSomethingImportantMissingRowIndexes: " + isSomethingImportantMissingRowIndexes);
     console.log("strongRowIndexes: " + strongRowIndexes);
     console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
     console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
     console.log("notePublRowIndexes: " + notePublRowIndexes);
-    **/
+
 	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
 		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
         	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
@@ -576,7 +524,7 @@ try {
 
 						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], strongRowIndexes[countNewRows+1],
                             nativeExampleSentenceRowIndexes[countNewRowsSentence]])) {
-							console.log("Two definitions with no example sentence between them.");
+							console.log("Two ToWrdDef with no example sentence between them.");
 							console.log("1 def:  " + strongRowIndexes[countNewRows]);
 							console.log("2 def:  " + strongRowIndexes[countNewRows+1]);
 							console.log("3 nat:  " + nativeExampleSentenceRowIndexes[countNewRowsSentence]);
@@ -649,7 +597,7 @@ try {
 			nativeExampleSentenceIndexes.push(-1);
 		}
 	}
-	console.log("headerRowIndexes before shift: " + headerRowIndexes);
+	//console.log("headerRowIndexes before shift: " + headerRowIndexes);
 	tableRowIndexes.pop();
 	tableRowIndexes.pop();
 	headerRowIndexes.shift();
@@ -682,9 +630,9 @@ try {
 	console.log("strongIndexes:");
 	console.log(strongIndexes);
 	console.log("strongIndexes.length: " + strongIndexes.length);
-	console.log("nativeExampleSentences: ");
-	console.log(nativeExampleSentences);
-	console.log("nativeExampleSentences.length: " + nativeExampleSentences.length);
+	console.log("FrEx: ");
+	console.log(FrEx);
+	console.log("FrEx.length: " + FrEx.length);
 	console.log("nativeExampleSentenceIndexes: ");
 	console.log(nativeExampleSentenceIndexes);
 	console.log("nativeExampleSentenceIndexes.length: " + nativeExampleSentenceIndexes.length);
@@ -701,21 +649,24 @@ try {
 	for (let k = 3; k < tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		//console.log("pay attention here");
 		if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("Traducciones Principales")) {
-			//console.log("(1) foreignDefinitions: " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, ''));
-			//console.log("(2) foreignTranslations: " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+			console.log("(1)  " + tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
+			console.log("(1)# " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
+			console.log("(2) " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+			console.log("(2)# " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 		}
 		if (tableRow[k].outerHTML.includes("class=\"dsense\"")) {
-			//console.log("(2.5) helper nativeTranslations: " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+			console.log("(2.5) " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 		}
 		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">")) {
-			//console.log("(3) nativeTranslations: " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+			console.log("(3)  " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+			console.log("(3)# " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 			nativeTranslationsRowIndexes.push(k);
 		}
 		if (tableRow[k].outerHTML.includes("class=\"FrEx\">")) {
-			//console.log("(4) foreignSentences: " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
+			console.log("(4)  " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
 		}
 		if (tableRow[k].outerHTML.includes("class=\"ToEx\">")) {
-			//console.log("(5) nativeSentences: " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+			console.log("(5)  " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 			nativeSentencesRowIndexes.push(k);
 		}
 	}
@@ -728,7 +679,6 @@ try {
 				rowStartIndexesCount++;
 			}
 			if (copyStatus
-			//&& !tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")
 			&& !tableRow[k].outerHTML.includes("Additional Translations")
 			&& !tableRow[k].outerHTML.includes("Compound Forms")
 			&& !tableRow[k].outerHTML.includes("langHeader")) {
@@ -788,9 +738,8 @@ try {
 
 				}
 			}
-			//console.log("buttonVariable:" + buttonVariable);
+
 			const sendMessageButton = document.getElementById('copyButton' + k);
-			//console.log("sendMessageButton: " + sendMessageButton.innerHTML);
 			sendMessageButton.onclick = async function(e) {
 				console.log("Copy button clicked");
 				console.log("idOrder: " + idOrder);
@@ -853,24 +802,7 @@ try {
 					}
 				}
 				console.log("currentNsRows: " + currentNsRows);
-				/**
-				if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("Traducciones Principales")) {
-					console.log("(1) foreignDefinitions: " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, ''));
-					console.log("(2) foreignTranslations: " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
-				}
-				if (tableRow[k].outerHTML.includes("class=\"dsense\"")) {
-					console.log("(2.5) helper nativeTranslations: " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
-				}
-				if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">")) {
-					console.log("(3) nativeTranslations: " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
-				}
-				if (tableRow[k].outerHTML.includes("class=\"FrEx\">")) {
-					console.log("(4) foreignSentences: " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
-				}
-				if (tableRow[k].outerHTML.includes("class=\"ToEx\">")) {
-					console.log("(5) nativeSentences: " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
-				}
-				**/
+
 				var clipboardHoldText = "";
 				for (let i = 0; i < idOrder.length; i++) {// 10
 					for (let j = 0; j < idWhichTrue.length; j++) {// 3
@@ -885,7 +817,7 @@ try {
 								}
 							} else if (idOrder[i] == "nt") {
 								for (let r = 0; r < currentNtRows.length; r++) {
-									clipboardHoldText += tableRow[currentNtRows[r]].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("") + "\n";
+									clipboardHoldText += tableRow[currentNtRows[r]].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '') + "\n";
 								}
 							} else if (idOrder[i] == "ns" && nsExists) {
 								for (let r = 0; r < currentNsRows.length; r++) {
@@ -900,8 +832,12 @@ try {
 				fsExists = true;
 				nsExists = true;
 				// cut off the last \n since all copies will end in \n
-				clipboardHoldText = clipboardHoldText.substring(0, clipboardHoldText.length-2);
-
+				clipboardHoldText = clipboardHoldText.substring(0, clipboardHoldText.length-1);
+				if (clipboardHoldText == "" || clipboardHoldText == "\n" ||
+					clipboardHoldText == "\n\n" || clipboardHoldText == "\n\n\n" ||
+					clipboardHoldText == "\n\n\n\n" || clipboardHoldText == "\n\n\n\n\n") {
+					clipboardHoldText = "Error: Nothing was copied. Are there only spaces checked, or is nothing checked at all?";
+				}
 				navigator.clipboard.writeText(clipboardHoldText);
 				console.log("Text copied:\n" + clipboardHoldText);
 			}

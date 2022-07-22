@@ -14,10 +14,9 @@ for (i = 0; i < acc.length; i++) {
 }
 // when the extension pop-up is opened
 document.addEventListener('DOMContentLoaded', function() {
+	console.log("DOMContentLoaded");
 	// assign variables by tags in the extension pop-up
-	var warning = document.getElementById('warning');
-	var radio1 = document.getElementById('radio1');
-	var radio2 = document.getElementById('radio2');
+	var warningForSpacing = document.getElementById('warningForSpacing');
 	var fw = document.getElementById('fw');
 	var b1 = document.getElementById('b1');
 	var fd = document.getElementById('fd');
@@ -28,33 +27,33 @@ document.addEventListener('DOMContentLoaded', function() {
 	var b4 = document.getElementById('b4');
 	var ns = document.getElementById('ns');
 	var b5 = document.getElementById('b5');
-
 	var saveChanges = document.getElementById('saveChanges');
 	var warningForClick = document.getElementById('warningForClick');
-
+	var item = document.querySelector('.item');
+	//var itemGray = document.querySelector('.itemGray');
 	const sendMessageButton = document.getElementById('toggleDefinitions');
 	const sendMessageButton2 = document.getElementById('toggleCopy');
 
-	chrome.storage.local.get(['radio', 'fdStatus', 'b1Status', 'ftStatus',
-						   	'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
-							'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
+	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
+				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded'], function(variable) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
-		warningForClick.hidden = true;
+		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
-		if (variable.radio == "radio1") {
-			radio1.setAttribute("checked", "checked");
-		} else if (variable.radio == "radio2") {
-			radio2.setAttribute("checked", "checked");
-		}
-		console.log("variable.currentHTML: " + variable.currentHTML);
+		if (!variable.dontShowAgain)
+			warningForClick.hidden = false;
+		else
+			warningForClick.hidden = true;
+
 		if (variable.currentHTML != null) {
 			document.getElementById("wrapperId").innerHTML = variable.currentHTML;
-			console.log("HTML updated");
+			console.log("Row order updated");
 		} else {
 			chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 			chrome.storage.local.set({ftStatus: true}, function() {});
 			chrome.storage.local.set({b2Status: true}, function() {});
 			chrome.storage.local.set({fsStatus: true}, function() {});
+
+			console.log("Checkboxes set to their default values");
 		}
 
 		document.getElementById("fd").checked = variable.fdStatus;
@@ -72,7 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
 		saveChanges.click();
 	});
 
-
 	saveChanges.onclick = async function(e) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		console.log("saveChanges clicked");
@@ -80,39 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		let tab = await chrome.tabs.query(queryOptions);
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			let url = tabs[0].url;
-			chrome.storage.local.get(['radio', 'fdStatus', 'b1Status', 'ftStatus',
+			chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus',
 									  'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 							        	'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain'], function(variable) {
 				chrome.tabs.sendMessage(tabs[0].id, {currentHTMLKey: variable.currentHTML}, function(response) {});
 
-			});
-		});
-	}
-	radio1.onclick = async function(e) {
-		chrome.storage.local.set({radio: "radio1"}, function() {});
-
-		let queryOptions = { active: true, currentWindow: true };
-		let tab = await chrome.tabs.query(queryOptions);
-		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-			let url = tabs[0].url;
-			chrome.storage.local.get(['radio'], function(variable) {
-				chrome.tabs.sendMessage(tabs[0].id, {radioKey: variable.radio}, function(response) {});
-				warningForClick.hidden = true;
-			});
-		});
-	}
-	radio2.onclick = async function(e) {
-		chrome.storage.local.set({radio: "radio2"}, function() {});
-
-		let queryOptions = { active: true, currentWindow: true };
-		let tab = await chrome.tabs.query(queryOptions);
-		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-			let url = tabs[0].url;
-			chrome.storage.local.get(['radio', 'dontShowAgain'], function(variable) {
-				chrome.tabs.sendMessage(tabs[0].id, {radioKey: variable.radio}, function(response) {});
-				if (!variable.dontShowAgain == true) {
-					warningForClick.hidden = false;
-				}
 			});
 		});
 	}
@@ -145,17 +115,24 @@ new Sortable(dragArea, {
 // event listener to work when html is refreshed:
 // https://stackoverflow.com/a/14259372
 document.querySelector('body').addEventListener('click', function(event) {
-	function warningCheck() {
-		if (document.getElementById('fd').checked == false && document.getElementById('ft').checked == false &&
-			document.getElementById('fs').checked == false && document.getElementById('nt').checked == false &&
-			document.getElementById('ns').checked == false) {
-			document.getElementById('warning').innerHTML = "<br>Warning: No checkboxes with text are selected, so nothing will be copied.";
-		} else {
-			document.getElementById('warning').innerHTML = "";
-		}
-	}
-	warningCheck();
+	chrome.storage.local.get(['hasDOMeverBeenLoaded'], function(variable) {
+		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
+	});
 
+	dragArea.onmouseenter = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			saveChanges.click();
+		});
+	}
+	dragArea.onmouseleave = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			saveChanges.click();
+		});
+	}
 
 	dontShowAgainButton.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
@@ -176,7 +153,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['fdStatus'], function(variable) {
 				chrome.storage.local.set({fdStatus: fd.checked}, function() {});
-				warningCheck();
 				console.log("fdStatus: " + variable.fdStatus);
 				saveChanges.click();
 			});
@@ -188,7 +164,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['ftStatus'], function(variable) {
 				chrome.storage.local.set({ftStatus: ft.checked}, function() {});
-				warningCheck();
 				saveChanges.click();
 			});
 		});
@@ -199,7 +174,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['fsStatus'], function(variable) {
 				chrome.storage.local.set({fsStatus: fs.checked}, function() {});
-				warningCheck();
 				saveChanges.click();
 			});
 		});
@@ -210,7 +184,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['ntStatus'], function(variable) {
 				chrome.storage.local.set({ntStatus: nt.checked}, function() {});
-				warningCheck();
 				saveChanges.click();
 			});
 		});
@@ -221,7 +194,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['nsStatus'], function(variable) {
 				chrome.storage.local.set({nsStatus: ns.checked}, function() {});
-				warningCheck();
 				saveChanges.click();
 			});
 		});

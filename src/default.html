@@ -9,34 +9,30 @@
 </header>
 <body>
     <hr>
-    <button id="toggleDefinitions" class="toggle">Toggle all definitions</button>
+    <button id="toggleDefinitions" class="toggle">Toggle native text</button>
+    <div id="warningForClick">
+        <aRed>Important:</aRed> <a>In order for clicking to reveal translations to work properly, go to
+            <a href="https://www.wordreference.com/2012/preferences.aspx" target="_blank"> WordReference's preferences</a>
+            <a>and ensure "click on word" is set to "does nothing."</a>
+        </a>
+        <br>
+        <button class="small" id="dontShowAgainButton">Ok</button>
+        <input class = "text" type="checkbox" id="dontShowAgainButtonCheck">
+        <label class = "text" for="dontShowAgainButtonCheck"><a>Don't show again</a></label><br>
+    </div>
+    <hr>
     <button id="toggleCopy" class="toggle">Toggle copy button</button>
+    <hr>
     <button class="accordion">Advanced settings</button>
     <div class="panel">
-        <a>
-            When does a definition get shown?<br>
-            <input type="radio" id="radio1" name="rad" value="0" checked="checked">
-            <label for="radio1">Hover</label><br>
-            <input type="radio" id="radio2" name="rad" value="0">
-            <label for="radio2">Click</label><br>
-        </a>
-        <div id="warningForClick">
-            <aRed>Warning: for click to work properly, go to
-                <a href="https://www.wordreference.com/2012/preferences.aspx" target="_blank"> WordReference's preferences</a>
-                and set "click on word" to "does nothing."
-            </aRed>
-            <br>
-            <button class="small" id="dontShowAgainButton">Ok</button>
-            <input class = "text" type="checkbox" id="dontShowAgainButtonCheck">
-            <label class = "text" for="dontShowAgainButtonCheck">Don't show again</label><br>
-        </div>
         <hr>
-        <a>What gets copied?</a>
+        <a>What is copied?</a>
         <br>
         <div class="wrapper" id="wrapperId">
             <div class="item">
                 <input class = "text" type="checkbox" id="fd">
                 <label class = "text" for="fd">Foreign definition</label><br>
+                <aRight title="estudiar">&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -47,6 +43,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="ft">
                 <label class = "text" for="ft">Foreign translation</label><br>
+                <aRight title="(asimilar conocimientos)">(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -57,6 +54,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="fs">
                 <label class = "text" for="fs">Foreign sentence</label><br>
+                <aRight title="Estoy estudiando derecho.">&nbsp;&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -67,6 +65,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="nt">
                 <label class = "text" for="nt">Native translation</label><br>
+                <aRight title="study">&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -77,6 +76,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="ns">
                 <label class = "text" for="ns">Native sentence</label><br>
+                <aRight title="I'm studying law.">&nbsp;&nbsp;&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -85,14 +85,17 @@
                 <i class="fas fa-bars"></i>
             </div>
         </div>
-        <button class="save" id="saveChanges">Save copy order</button>
-        <aRed id="warning"></aRed>
+
+        <button class="small2" id="saveChanges">Force save</button>
+        <button class="small2" id="reset">Reset</button>
+
     </div>
     <hr>
-    <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank" title="https://forms.gle/vFTEPePBf4brEZ9cA">Report a Bug</a>
     <a href="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ" target="_blank" title="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ">Donate</a>
     <a href="https://github.com/Giospiral/Monolingual-WordReference" target="_blank" title="https://github.com/Giospiral/Monolingual-WordReference">Github</a>
-    <a href="https://www.youtube.com" target="_blank" title="https://www.youtube.com">Tutorial</a>
+    <a href="https://www.youtube.com" target="_blank" title="https://www.youtube.com">Video Overview</a>
+    <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank" title="https://forms.gle/vFTEPePBf4brEZ9cA">Bug Report</a>
+    <a href="https://www.wordreference.com" target="_blank" title="https://www.wordreference.com">WordReference.com</a>
     <br>
 </body>
 <script src="drag.js"></script>
