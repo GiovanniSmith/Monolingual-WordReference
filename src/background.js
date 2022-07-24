@@ -1,20 +1,30 @@
-// accordion stuff
-var acc = document.getElementsByClassName("accordion");
-var i;
-for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    var panel = this.nextElementSibling;
-    if (panel.style.maxHeight) {
-      panel.style.maxHeight = null;
-    } else {
-      panel.style.maxHeight = panel.scrollHeight + "px";
-    }
-  });
+// tab stuff
+function openTab(evt, cityName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
 }
+
+
 // when the extension pop-up is opened
 document.addEventListener('DOMContentLoaded', function() {
 	console.log("DOMContentLoaded");
+
 	// assign variables by tags in the extension pop-up
 	var warningForSpacing = document.getElementById('warningForSpacing');
 	var fw = document.getElementById('fw');
@@ -33,9 +43,20 @@ document.addEventListener('DOMContentLoaded', function() {
 	//var itemGray = document.querySelector('.itemGray');
 	const sendMessageButton = document.getElementById('toggleDefinitions');
 	const sendMessageButton2 = document.getElementById('toggleCopy');
+	var generalCopyTab = document.getElementById('generalCopyTab');
+    var nitpickyCopyTab = document.getElementById('nitpickyCopyTab');
+
+    var fdTooltips = document.getElementById('fdTooltips');
+    var ntTooltips = document.getElementById('ntTooltips');
+    var hntParenthesis = document.getElementById('hntParenthesis');
+    var ftParenthesis = document.getElementById('ftParenthesis');
+    var ntSameRow = document.getElementById('ntSameRow');
+
+	generalCopyTab.click();
 
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
-				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded'], function(variable) {
+				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
+				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow'], function(variable) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
@@ -67,6 +88,12 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("b3").checked = variable.b3Status;
 		document.getElementById("b4").checked = variable.b4Status;
 		document.getElementById("b5").checked = variable.b5Status;
+
+		document.getElementById("fdTooltips").checked = variable.fdTooltips;
+		document.getElementById("ntTooltips").checked = variable.ntTooltips;
+		document.getElementById("hntParenthesis").checked = variable.hntParenthesis;
+		document.getElementById("ftParenthesis").checked = variable.ftParenthesis;
+		document.getElementById("ntSameRow").checked = variable.ntSameRow;
 
 		saveChanges.click();
 	});
@@ -104,6 +131,21 @@ document.addEventListener('DOMContentLoaded', function() {
 			chrome.storage.local.get(['toggleCopy'], function(variable) {
 				chrome.tabs.sendMessage(tabs[0].id, {toggleCopyKey: variable.toggleCopy}, function(response) {});
 			});
+		});
+	}
+
+	generalCopyTab.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			openTab(event, 'generalCopy');
+		});
+	}
+	nitpickyCopyTab.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			openTab(event, 'nitpickyCopy');
 		});
 	}
 }, false);
@@ -246,6 +288,62 @@ document.querySelector('body').addEventListener('click', function(event) {
 			chrome.storage.local.get(['b5Status'], function(variable) {
 				chrome.storage.local.set({b5Status: b5.checked}, function() {});
 				saveChanges.click();
+			});
+		});
+	}
+
+	fdTooltips.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['fdTooltips'], function(variable) {
+				chrome.storage.local.set({fdTooltips: fdTooltips.checked}, function() {});
+				console.log("fdTooltips: " + fdTooltips.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {fdTooltips: variable.fdTooltips}, function(response) {});
+			});
+		});
+	}
+	ntTooltips.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['ntTooltips'], function(variable) {
+				chrome.storage.local.set({ntTooltips: ntTooltips.checked}, function() {});
+				console.log("ntTooltips: " + ntTooltips.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {ntTooltips: variable.ntTooltips}, function(response) {});
+			});
+		});
+	}
+    hntParenthesis.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['hntParenthesis'], function(variable) {
+				chrome.storage.local.set({hntParenthesis: hntParenthesis.checked}, function() {});
+				console.log("hntParenthesis: " + hntParenthesis.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {hntParenthesis: variable.hntParenthesis}, function(response) {});
+			});
+		});
+	}
+    ftParenthesis.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['ftParenthesis'], function(variable) {
+				chrome.storage.local.set({ftParenthesis: ftParenthesis.checked}, function() {});
+				console.log("ftParenthesis: " + ftParenthesis.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {ftParenthesis: variable.ftParenthesis}, function(response) {});
+			});
+		});
+	}
+    ntSameRow.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['ntSameRow'], function(variable) {
+				chrome.storage.local.set({ntSameRow: ntSameRow.checked}, function() {});
+				console.log("ntSameRow: " + ntSameRow.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {ntSameRow: variable.ntSameRow}, function(response) {});
 			});
 		});
 	}

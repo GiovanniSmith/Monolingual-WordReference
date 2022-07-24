@@ -72,6 +72,12 @@ var exampleSentenceRowIndexes = [];
 var nativeTranslationsRowIndexes = [];
 var nativeSentencesRowIndexes = [];
 
+var fdTooltips;
+var ntTooltips;
+var hntParenthesis;
+var ftParenthesis;
+var ntSameRow;
+
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
 }
@@ -162,6 +168,21 @@ function equalLengthBrackets(text) {
 	return "[...]";
 }
 
+function removeAttributes(text) {
+	text = text.replace("&quot;", "\"");
+	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'[...]\';\">[...]", "");
+	text = text.replace(" onclick=\"this.innerHTML=\'", ">");
+	return text;
+}
+
+function removeAttributesV2(text) {
+	text = text.replace(" onclick=\"this.innerHTML=\'\';\" onmouseleave=\"this.innerHTML=\'\'\" style=\"text-align:right\"", "\"");
+	text = text.replace(" onclick=\"this.innerHTML=\'", ">");
+	text = text.replace("&quot;", "\"");
+	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'[...]\';\">[...]", "");
+	return text;
+}
+
 // get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
 for (let i = 0; i < languageAbbreviations.length; i++) {
 	for (let j = 0; j < languageAbbreviations.length; j++) {
@@ -229,6 +250,13 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 	}
 
 	console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
+});
+chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow'], function(variable) {
+	fdTooltips = variable.fdTooltips;
+	ntTooltips = variable.ntTooltips;
+	hntParenthesis = variable.hntParenthesis;
+	ftParenthesis = variable.ftParenthesis;
+	ntSameRow = variable.ntSameRow;
 });
 /**
 try {
@@ -314,6 +342,14 @@ chrome.runtime.onMessage.addListener(
 		}
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
+
+	  chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow'], function(variable) {
+      	fdTooltips = variable.fdTooltips;
+      	ntTooltips = variable.ntTooltips;
+      	hntParenthesis = variable.hntParenthesis;
+      	ftParenthesis = variable.ftParenthesis;
+      	ntSameRow = variable.ntSameRow;
+      });
     }
 );
 
@@ -365,6 +401,7 @@ try {
 catch (exception_var) {
 	console.log(exception_var);
 }
+
 // hides some html elements to either [...] or a blank
 function removeDefinitions() {
 	try {
@@ -614,6 +651,7 @@ try {
 
 	// add an additional row to account for "is something missing" sentence
 	tableRowIndexes.push(tableRowIndexes[tableRowIndexes.length-1]+1);
+
 	console.log("--------");
 	console.log("strongRowIndexes: " + strongRowIndexes);
 	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
@@ -645,31 +683,55 @@ try {
 	console.log("headerRowIndexes: ");
 	console.log(headerRowIndexes);
 
-	// fill up foreignTranslations, nativeTranslations, etc
+	var foreignDefinitions = [], foreignDefinitionsNoTooltip = [],
+	foreignTranslations = [], foreignTranslationsNoParenthesis = [],
+	helperNativeTranslations = [], helperNativeTranslationsNoParenthesis = [],
+	nativeTranslations = [], nativeTranslationsNoTooltip = [],
+	nativeSentences = [],
+	foreignSentences = []
+	;
+
 	for (let k = 3; k < tableRowIndexes[tableRowIndexes.length-1]; k++) {
-		//console.log("pay attention here");
-		if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("Traducciones Principales")) {
-			console.log("(1)  " + tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
-			console.log("(1)# " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
-			console.log("(2) " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
-			console.log("(2)# " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
+		if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("Traducciones Principales")
+			&& !tableRow[k].outerHTML.includes("Traducciones Compuestos")&& !tableRow[k].outerHTML.includes("Traducciones Adicionales")) {
+//			console.log("(1)  " + tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			console.log("(1)# " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
+//			console.log("(2) " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+//			console.log("(2)# " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
+
+//			foreignDefinitions.push(tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			foreignDefinitionsNoTooltip.push(tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
+//			foreignTranslations.push((tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+//			foreignTranslationsNoParenthesis.push((tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 		}
 		if (tableRow[k].outerHTML.includes("class=\"dsense\"")) {
-			console.log("(2.5) " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			console.log("(2.5) " + tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			console.log("(2.5)#" + tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
+
+//			helperNativeTranslations.push(tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			helperNativeTranslationsNoParenthesis.push(tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 		}
-		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">")) {
-			console.log("(3)  " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
-			console.log("(3)# " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">") && !tableRow[k].outerHTML.includes("langHeader")) {
+//			console.log("(3)  " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+//			console.log("(3)# " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 			nativeTranslationsRowIndexes.push(k);
+//
+//			nativeTranslations.push(tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+//			nativeTranslationsNoTooltip.push(tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 		}
 		if (tableRow[k].outerHTML.includes("class=\"FrEx\">")) {
-			console.log("(4)  " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
+//			console.log("(4)  " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
+
+//			foreignSentences.push(tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
 		}
 		if (tableRow[k].outerHTML.includes("class=\"ToEx\">")) {
-			console.log("(5)  " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
+//			console.log("(5)  " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 			nativeSentencesRowIndexes.push(k);
+
+//			nativeSentences.push(tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 		}
 	}
+
 	// copy button
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
@@ -755,7 +817,7 @@ try {
 						currentFdRow--;
 					}
 				}
-				console.log("currentFdRow: " + currentFdRow);
+				//console.log("currentFdRow: " + currentFdRow);
 				var currentFtRow = currentFdRow;
 
 				var currentFsRows = [];
@@ -772,7 +834,7 @@ try {
 						break;
 					}
 				}
-				console.log("currentFsRows: " + currentFsRows);
+				//console.log("currentFsRows: " + currentFsRows);
 
 				var currentNtRows = [];
 				var currentNtRow = currentFdRow;
@@ -785,7 +847,7 @@ try {
 						break;
 					}
 				}
-				console.log("currentNtRows: " + currentNtRows);
+				//console.log("currentNtRows: " + currentNtRows);
 
 				var currentNsRows = [];
 				var currentNsRow = currentFdRow;
@@ -801,27 +863,64 @@ try {
 						break;
 					}
 				}
-				console.log("currentNsRows: " + currentNsRows);
+				//console.log("currentNsRows: " + currentNsRows);
+
+				chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow'], function(variable) {
+					fdTooltips = variable.fdTooltips;
+					ntTooltips = variable.ntTooltips;
+					hntParenthesis = variable.hntParenthesis;
+					ftParenthesis = variable.ftParenthesis;
+					ntSameRow = variable.ntSameRow;
+                });
+
 
 				var clipboardHoldText = "";
 				for (let i = 0; i < idOrder.length; i++) {// 10
 					for (let j = 0; j < idWhichTrue.length; j++) {// 3
 						if (idOrder[i].includes(idWhichTrue[j])) {
-							if (idOrder[i] == "fd")
-								clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '') + "\n";
-							else if (idOrder[i] == "ft")
-								clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '') + "\n";
-							else if (idOrder[i] == "fs" && fsExists) {// no period at the ends of sentences
+							if (idOrder[i] == "fd") {
+								if (fdTooltips == true) {
+									clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '');
+								} else {
+									clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+								}
+								clipboardHoldText += "\n";
+							} else if (idOrder[i] == "ft") {
+								if (ftParenthesis == true) {
+									clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '');
+								} else {
+									clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
+								}
+								clipboardHoldText += "\n";
+							} else if (idOrder[i] == "fs" && fsExists) {
 								for (let r = 0; r < currentFsRows.length; r++) {
-									clipboardHoldText += tableRow[currentFsRows[r]].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0].replace( /(<([^>]+)>)/ig, '') + "\n";
+									clipboardHoldText += tableRow[currentFsRows[r]].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0] + "\n";
 								}
 							} else if (idOrder[i] == "nt") {
 								for (let r = 0; r < currentNtRows.length; r++) {
-									clipboardHoldText += tableRow[currentNtRows[r]].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '') + "\n";
+									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
+									currentTableRow = removeAttributesV2(currentTableRow);
+									if (ntSameRow == true) {
+										if (ntTooltips == true) {
+											clipboardHoldText += currentTableRow.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+										} else {
+											clipboardHoldText += currentTableRow.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '')
+										}
+										clipboardHoldText += ", ";
+									} else {
+										if (ntTooltips == true) {
+											clipboardHoldText += currentTableRow.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+										} else {
+											clipboardHoldText += currentTableRow.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '')
+										}
+										clipboardHoldText += "\n";
+									}
 								}
 							} else if (idOrder[i] == "ns" && nsExists) {
 								for (let r = 0; r < currentNsRows.length; r++) {
-									clipboardHoldText += tableRow[currentNsRows[r]].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, '') + "\n";
+									var currentTableRow = tableRow[currentNsRows[r]].outerHTML;
+									currentTableRow = removeAttributesV2(currentTableRow);
+									clipboardHoldText += removeBackslashBeforeApostrophe((currentTableRow.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, '')).replace("&quot;", "").replace("&quot;", "")) + "\n";
 								}
 							} else if (idOrder[i] == "b1" || idOrder[i] == "b2" || idOrder[i] == "b3" || idOrder[i] == "b4" || idOrder[i] == "b5")
 								clipboardHoldText += "\n";
