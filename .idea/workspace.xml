@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bfede036-dc94-4040-9878-8d5f683f2949" name="Changes" comment="Changed HTML of popup window">
-      <change afterPath="$PROJECT_DIR$/src/advancedSettings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/background.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/default.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/default.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/defaultStyles.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/defaultStyles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/toggleDefinitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/toggleDefinitions.js" afterDir="false" />
-    </list>
+    <list default="true" id="bfede036-dc94-4040-9878-8d5f683f2949" name="Changes" comment="Changed HTML of popup window" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
