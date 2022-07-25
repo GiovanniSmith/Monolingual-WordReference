@@ -23,7 +23,7 @@ function openTab(evt, cityName) {
 
 // when the extension pop-up is opened
 document.addEventListener('DOMContentLoaded', function() {
-	console.log("DOMContentLoaded");
+	console.log("document.addEventListener('DOMContentLoaded', function()");
 
 	// assign variables by tags in the extension pop-up
 	var warningForSpacing = document.getElementById('warningForSpacing');
@@ -52,11 +52,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var ftParenthesis = document.getElementById('ftParenthesis');
     var ntSameRow = document.getElementById('ntSameRow');
 
+    var click = document.getElementById('click');
+    var hover = document.getElementById('hover');
+    var radio1 = document.getElementById('radio1');
+    var radio2 = document.getElementById('radio2');
+
 	generalCopyTab.click();
 
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
-				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow'], function(variable) {
+				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
+				'hntEnabled', 'radio1', 'radio2', 'click', 'hover'], function(variable) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
@@ -73,6 +79,15 @@ document.addEventListener('DOMContentLoaded', function() {
 			chrome.storage.local.set({ftStatus: true}, function() {});
 			chrome.storage.local.set({b2Status: true}, function() {});
 			chrome.storage.local.set({fsStatus: true}, function() {});
+
+			chrome.storage.local.set({hntEnabled: true}, function() {});
+			chrome.storage.local.set({hntParenthesis: true}, function() {});
+			chrome.storage.local.set({ftParenthesis: true}, function() {});
+			chrome.storage.local.set({ntSameRow: true}, function() {});
+
+			chrome.storage.local.set({click: true}, function() {});
+			chrome.storage.local.set({hover: false}, function() {});
+			chrome.storage.local.set({radio1: true}, function() {});
 
 			console.log("Checkboxes set to their default values");
 		}
@@ -91,11 +106,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		document.getElementById("fdTooltips").checked = variable.fdTooltips;
 		document.getElementById("ntTooltips").checked = variable.ntTooltips;
+		document.getElementById("hntEnabled").checked = variable.hntEnabled;
 		document.getElementById("hntParenthesis").checked = variable.hntParenthesis;
 		document.getElementById("ftParenthesis").checked = variable.ftParenthesis;
 		document.getElementById("ntSameRow").checked = variable.ntSameRow;
 
-		saveChanges.click();
+		document.getElementById("radio1").checked = variable.radio1;
+		document.getElementById("radio2").checked = variable.radio2;
+		document.getElementById("click").checked = variable.click;
+		document.getElementById("hover").checked = variable.hover;
+		//saveChanges.click();
 	});
 
 	saveChanges.onclick = async function(e) {
@@ -138,14 +158,21 @@ document.addEventListener('DOMContentLoaded', function() {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-			openTab(event, 'generalCopy');
+			openTab(e, 'generalCopy');
 		});
 	}
 	nitpickyCopyTab.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-			openTab(event, 'nitpickyCopy');
+			openTab(e, 'nitpickyCopy');
+		});
+	}
+	clickOrHoverTab.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			openTab(e, 'clickOrHover');
 		});
 	}
 }, false);
@@ -157,6 +184,8 @@ new Sortable(dragArea, {
 // event listener to work when html is refreshed:
 // https://stackoverflow.com/a/14259372
 document.querySelector('body').addEventListener('click', function(event) {
+	console.log("document.querySelector('body').addEventListener('click', function(event)");
+
 	chrome.storage.local.get(['hasDOMeverBeenLoaded'], function(variable) {
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 	});
@@ -325,6 +354,17 @@ document.querySelector('body').addEventListener('click', function(event) {
 			});
 		});
 	}
+	hntEnabled.onclick = async function(e) {
+    		let queryOptions = { active: true, currentWindow: true };
+    		let tab = await chrome.tabs.query(queryOptions);
+    		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+    			chrome.storage.local.get(['hntEnabled'], function(variable) {
+    				chrome.storage.local.set({hntEnabled: hntEnabled.checked}, function() {});
+    				console.log("hntEnabled: " + hntEnabled.checked);
+    				chrome.tabs.sendMessage(tabs[0].id, {hntEnabled: variable.hntEnabled}, function(response) {});
+    			});
+    		});
+    	}
     ftParenthesis.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);
@@ -344,6 +384,59 @@ document.querySelector('body').addEventListener('click', function(event) {
 				chrome.storage.local.set({ntSameRow: ntSameRow.checked}, function() {});
 				console.log("ntSameRow: " + ntSameRow.checked);
 				chrome.tabs.sendMessage(tabs[0].id, {ntSameRow: variable.ntSameRow}, function(response) {});
+			});
+		});
+	}
+
+	click.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['click'], function(variable) {
+				chrome.storage.local.set({click: click.checked}, function() {});
+				chrome.storage.local.set({hover: false}, function() {});
+				console.log("click: " + click.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {click: variable.click}, function(response) {});
+				chrome.tabs.sendMessage(tabs[0].id, {hover: variable.hover}, function(response) {});
+			});
+		});
+	}
+	hover.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['hover'], function(variable) {
+				chrome.storage.local.set({click: false}, function() {});
+				chrome.storage.local.set({hover: hover.checked}, function() {});
+				console.log("hover: " + hover.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {click: variable.click}, function(response) {});
+				chrome.tabs.sendMessage(tabs[0].id, {hover: variable.hover}, function(response) {});
+			});
+		});
+	}
+	radio1.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['radio1'], function(variable) {
+				chrome.storage.local.set({radio1: radio1.checked}, function() {});
+				chrome.storage.local.set({radio2: false}, function() {});
+				console.log("radio1: " + radio1.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {radio1: variable.radio1}, function(response) {});
+				chrome.tabs.sendMessage(tabs[0].id, {radio2: variable.radio2}, function(response) {});
+			});
+		});
+	}
+	radio2.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['radio2'], function(variable) {
+				chrome.storage.local.set({radio1: false}, function() {});
+				chrome.storage.local.set({radio2: radio2.checked}, function() {});
+				console.log("radio2: " + radio2.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {radio1: variable.radio1}, function(response) {});
+				chrome.tabs.sendMessage(tabs[0].id, {radio2: variable.radio2}, function(response) {});
 			});
 		});
 	}

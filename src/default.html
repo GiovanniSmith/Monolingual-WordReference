@@ -11,7 +11,7 @@
     <hr>
     <button id="toggleDefinitions" class="toggle">Toggle native text</button>
     <div id="warningForClick">
-        <aRed>Important:</aRed> <a>In order for clicking to reveal translations to work properly, go to
+        <aRed>Important:</aRed> <a>In order for clicking to reveal text to work properly, go to
             <a href="https://www.wordreference.com/2012/preferences.aspx" target="_blank"> WordReference's preferences</a>
             <a>and ensure "click on word" is set to "does nothing."</a>
         </a>
@@ -23,17 +23,38 @@
     <hr>
     <button id="toggleCopy" class="toggle">Toggle copy button</button>
     <hr>
-    <h1>Copy Settings</h1>
     <div class="tab">
-        <button class="tablinks" id="generalCopyTab">Text Order</button>
-        <button class="tablinks" id="nitpickyCopyTab">Text Edit</button>
+        <button class="tablinks" id="clickOrHoverTab">Text settings</button>&nbsp;
+        <button class="tablinks" id="generalCopyTab">Copy Order</button>&nbsp;
+        <button class="tablinks" id="nitpickyCopyTab">Copy Edit</button>
+    </div>
+    <div id="clickOrHover" class="tabcontent">
+        <a>
+            Show hidden text on
+            <br>
+            <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="click">
+            <label class = "text" for="click">Click</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="hover">
+            <label class = "text" for="hover">Hover</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <br>
+            <aRed id="requiresPageReload1">(requires page reload)</aRed>
+            <br>
+            Placeholder for hidden text
+            <br>
+            <input type="radio" name="hideText" class = "text" type="checkbox" id="radio1">
+            <label class = "text" for="radio1">[...]</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="hideText" class = "text" type="checkbox" id="radio2">
+            <label class = "text" for="radio2">{...}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <br>
+            <aRed id="requiresPageReload2">(requires page reload)</aRed>
+        </a>
     </div>
     <div id="generalCopy" class="tabcontent">
         <div class="wrapper" id="wrapperId">
             <div class="item">
                 <input class = "text" type="checkbox" id="fd">
                 <label class = "text" for="fd">Foreign definition</label><br>
-                <aRight title="estudiar">&nbsp;&nbsp;(?)</aRight>
+                <aRight title="{comer}    ingerir, tragar    eat&#013;&#09;&#09;  Hay que comer verduras.&#013;&#09;&#09;  You need to eat vegetables.">&nbsp;&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -42,20 +63,20 @@
                 <i class="fas fa-bars"></i>
             </div>
             <div class="item">
-                <input class = "text" type="checkbox" id="ft">
+                <input class = "text" type="checkbox" id="ft" checked="checked">
                 <label class = "text" for="ft">Foreign translation</label><br>
-                <aRight title="(asimilar conocimientos)">(?)</aRight>
+                <aRight title="comer    {ingerir, tragar}    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
-                <input class = "text" type="checkbox" id="b2">
+                <input class = "text" type="checkbox" id="b2" checked="checked">
                 <label class = "text" for="b2">(space)</label><br>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="item">
-                <input class = "text" type="checkbox" id="fs">
+                <input class = "text" type="checkbox" id="fs" checked="checked">
                 <label class = "text" for="fs">Foreign sentence</label><br>
-                <aRight title="Estoy estudiando derecho.">&nbsp;&nbsp;(?)</aRight>
+                <aRight title="comer    ingerir, tragar    eat&#013;&#09;&#09;{Hay que comer verduras.}&#013;&#09;&#09; You need to eat vegetables.">&nbsp;&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -66,7 +87,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="nt">
                 <label class = "text" for="nt">Native translation</label><br>
-                <aRight title="study">&nbsp;(?)</aRight>
+                <aRight title="comer    ingerir, tragar    {eat}&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -77,7 +98,7 @@
             <div class="item">
                 <input class = "text" type="checkbox" id="ns">
                 <label class = "text" for="ns">Native sentence</label><br>
-                <aRight title="I'm studying law.">&nbsp;&nbsp;&nbsp;(?)</aRight>
+                <aRight title="comer    ingerir, tragar    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;{You need to eat vegetables.}">&nbsp;&nbsp;&nbsp;(?)</aRight>
                 <i class="fas fa-bars"></i>
             </div>
             <div class="itemGray">
@@ -94,23 +115,27 @@
     <div id="nitpickyCopy" class="tabcontent">
         <a>
             <input class = "text" type="checkbox" id="fdTooltips">
-            <label class = "text" for="fdTooltips">Add tooltips when copying foreign definition</label>
-            <aRight title="Enabled:  estudiar⇒ vtr&#013;Disabled: estudiar">&nbsp;&nbsp;(?)</aRight><br>
+            <label class = "text" for="fdTooltips">Include grammar when copying foreign definition</label>
+            <aRight title="Enabled:  estudiar vtr&#013;Disabled: estudiar">&nbsp;&nbsp;(?)</aRight><br>
 
             <input class = "text" type="checkbox" id="ntTooltips">
-            <label class = "text" for="ntTooltips">Add tooltips when copying native translation</label>
-            <aRight title="Enabled:  look into vi phrasal&#013;          &#09;consider⇒, evaluate⇒ vtr&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
+            <label class = "text" for="ntTooltips">Include grammar when copying native translation</label>
+            <aRight title="Enabled:  look into vi phrasal&#013;          &#09;consider, evaluate vtr&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
+
+            <input class = "text" type="checkbox" id="hntEnabled">
+            <label class = "text" for="hntEnabled">Include helper native translation (if exists) when copying native translation</label>
+            <aRight title="Enabled:  (action) do&#013;Disabled:  do">&nbsp;&nbsp;(?)</aRight><br>
 
             <input class = "text" type="checkbox" id="hntParenthesis">
-            <label class = "text" for="hntParenthesis">Add parenthesis when copying helper native translation</label>
+            <label class = "text" for="hntParenthesis">Include parenthesis when copying helper native translation</label>
             <aRight title="Enabled:  (action) do&#013;Disabled: action do">&nbsp;&nbsp;(?)</aRight><br>
 
             <input class = "text" type="checkbox" id="ftParenthesis">
-            <label class = "text" for="ftParenthesis">Add parenthesis when copying foreign translation</label>
+            <label class = "text" for="ftParenthesis">Include parenthesis when copying foreign translation</label>
             <aRight title="Enabled:  (asimilar conocimientos)&#013;Disabled: asimilar conocimientos">&nbsp;&nbsp;(?)</aRight><br>
 
             <input class = "text" type="checkbox" id="ntSameRow">
-            <label class = "text" for="ntSameRow">Put multiple native translations on same row</label>
+            <label class = "text" for="ntSameRow">Put multiple native translations on one row</label>
             <aRight title="Enabled:  look into, consider, evaluate&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
         </a>
     </div>
@@ -120,6 +145,7 @@
     <a href="https://www.youtube.com" target="_blank" title="https://www.youtube.com">Video Overview</a>
     <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank" title="https://forms.gle/vFTEPePBf4brEZ9cA">Bug Report</a>
     <a href="https://www.wordreference.com" target="_blank" title="https://www.wordreference.com">WordReference.com</a>
+    <a>Version: Beta</a>
 </body>
 <script src="drag.js"></script>
 <script src="background.js"></script>
