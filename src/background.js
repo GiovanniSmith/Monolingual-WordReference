@@ -25,22 +25,26 @@ function openTab(evt, cityName) {
 document.addEventListener('DOMContentLoaded', function() {
 	console.log("document.addEventListener('DOMContentLoaded', function()");
 
-	// assign variables by tags in the extension pop-up
-	var warningForSpacing = document.getElementById('warningForSpacing');
-	var fw = document.getElementById('fw');
-	var b1 = document.getElementById('b1');
 	var fd = document.getElementById('fd');
-	var b2 = document.getElementById('b2');
-	var nd = document.getElementById('nd');
-	var b3 = document.getElementById('b3');
+	var ft = document.getElementById('ft');
 	var fs = document.getElementById('fs');
-	var b4 = document.getElementById('b4');
+	var nd = document.getElementById('nd');
 	var ns = document.getElementById('ns');
+
+	var b1 = document.getElementById('b1');
+	var b2 = document.getElementById('b2');
+	var b3 = document.getElementById('b3');
+	var b4 = document.getElementById('b4');
 	var b5 = document.getElementById('b5');
+
+	var fdCapitalize = document.getElementById('fdCapitalize');
+	var ftCapitalize = document.getElementById('ftCapitalize');
+	var ndCapitalize = document.getElementById('ndCapitalize');
+
 	var saveChanges = document.getElementById('saveChanges');
 	var warningForClick = document.getElementById('warningForClick');
 	var item = document.querySelector('.item');
-	//var itemGray = document.querySelector('.itemGray');
+
 	const sendMessageButton = document.getElementById('toggleDefinitions');
 	const sendMessageButton2 = document.getElementById('toggleCopy');
 	var generalCopyTab = document.getElementById('generalCopyTab');
@@ -63,7 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
 				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
-				'hntEnabled', 'radio1', 'radio2', 'click', 'hover', 'capitalize'], function(variable) {
+				'hntEnabled', 'radio1', 'radio2', 'click', 'hover', 'capitalize',
+				'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
@@ -105,6 +110,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("b3").checked = variable.b3Status;
 		document.getElementById("b4").checked = variable.b4Status;
 		document.getElementById("b5").checked = variable.b5Status;
+
+		document.getElementById("fdCapitalize").checked = variable.fdCapitalize;
+		document.getElementById("ftCapitalize").checked = variable.ftCapitalize;
+		document.getElementById("ntCapitalize").checked = variable.ntCapitalize;
 
 		document.getElementById("capitalize").checked = variable.capitalize;
 		document.getElementById("fdTooltips").checked = variable.fdTooltips;
@@ -319,6 +328,43 @@ document.querySelector('body').addEventListener('click', function(event) {
 		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
 			chrome.storage.local.get(['b5Status'], function(variable) {
 				chrome.storage.local.set({b5Status: b5.checked}, function() {});
+				saveChanges.click();
+			});
+		});
+	}
+
+	fdCapitalize.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['fdCapitalize'], function(variable) {
+				chrome.storage.local.set({fdCapitalize: fdCapitalize.checked}, function() {});
+				chrome.tabs.sendMessage(tabs[0].id, {fdCapitalize: variable.fdCapitalize}, function(response) {});
+				console.log("fdCapitalize: " + variable.fdCapitalize);
+				saveChanges.click();
+			});
+		});
+	}
+	ftCapitalize.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['ftCapitalize'], function(variable) {
+				chrome.storage.local.set({ftCapitalize: ftCapitalize.checked}, function() {});
+				chrome.tabs.sendMessage(tabs[0].id, {ftCapitalize: variable.ftCapitalize}, function(response) {});
+				console.log("ftCapitalize: " + variable.ftCapitalize);
+				saveChanges.click();
+			});
+		});
+	}
+	ntCapitalize.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['ntCapitalize'], function(variable) {
+				chrome.storage.local.set({ntCapitalize: ntCapitalize.checked}, function() {});
+				chrome.tabs.sendMessage(tabs[0].id, {ntCapitalize: variable.ntCapitalize}, function(response) {});
+				console.log("ntCapitalize: " + variable.ntCapitalize);
 				saveChanges.click();
 			});
 		});

@@ -79,11 +79,32 @@ var hntParenthesis;
 var ftParenthesis;
 var ntSameRow;
 
+var fdCapitalize;
+var ftCapitalize;
+var ntCapitalize;
+
 var hoverOrClickAttributeName = "onclick";
 var click;
 var hover;
 
 var hideTextPlaceholder = "[...]";
+
+/**
+spanish: nm, nf (el, la)
+italian: nm, nf (il, la)
+french: nm, nf (le, la)
+portuguese: sm, sf (o, a)
+
+german: nm, nf, nn (der, die, das)
+dutch: ???? (de, de, het)
+swedish: den, den det
+icelandic: ?
+russian: ?
+polish: doesnt exist
+romanian: bruh
+czech: doesnt exist
+
+**/
 
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
@@ -162,10 +183,21 @@ function displayTextWidth(text, font) { // https://www.w3docs.com/snippets/javas
 function removeDataPh(number) {
 	return !number.outerHTML.includes("data-ph");
 }
+
+function isLetter(str) {// https://stackoverflow.com/a/9862788
+  return str.length === 1 && str.match(/[a-z]/i);
+}
+
 function capitalizeFirstLetter(text) {
 	var returnThis;
 	if (text.length > 1) {
-		returnThis = text.substring(0, 1).toUpperCase() + text.substring(1);
+		if (!isLetter(text.substring(0, 1))) {
+			returnThis = text.substring(0, 1) + text.substring(1, 2).toUpperCase();
+			if (text.length > 2)
+				 returnThis += text.substring(2);
+		} else {
+			returnThis = text.substring(0, 1).toUpperCase() + text.substring(1);
+		}
 	} else {
 		returnThis = text.toUpperCase();
 	}
@@ -179,21 +211,71 @@ chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
 		hideTextPlaceholder = "{...}";
 });
 
-function arraysEqual(a, b) {
-  // https://stackoverflow.com/a/16436975
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (a.length !== b.length) return false;
-
-  // If you don't care about the order of the elements inside
-  // the array, you should sort both arrays here.
-  // Please note that calling sort on an array will modify that array.
-  // you might want to clone your array first.
-
-  for (var i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+function addArticles(text, language) {
+	switch(language) {
+      case "es":
+      return addArticlesSpanish(text);
+      break;
+      case "fr":
+      return addArticlesFrench(text);
+      break;
+      case "it":
+	  return addArticlesItalian(text);
+	  break;
+	  case "pr":
+      return addArticlesPortuguese(text);
+	  break;
+      default:
+      return "Error in addArticles()";
+    }
+}
+function addArticlesSpanish(text) {
+	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
+		text = text.substring(0, text.length-7);
+		return "el " + text.split(", ")[0] + ", la " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " nf") {// amiga nf
+		return "la " + text.substring(0, text.length-3);
+	} else if (text.substring(text.length-3) == " nm") {// amigo nm
+		return "el " + text.substring(0, text.length-3);
+	} else {
+		return text;
+	}
+}
+function addArticlesFrench(text) {
+	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
+		text = text.substring(0, text.length-7);
+		return "le " + text.split(", ")[0] + ", la " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " nf") {// amiga nf
+		return "la " + text.substring(0, text.length-3);
+	} else if (text.substring(text.length-3) == " nm") {// amigo nm
+		return "le " + text.substring(0, text.length-3);
+	} else {
+		return text;
+	}
+}
+function addArticlesItalian(text) {
+	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
+		text = text.substring(0, text.length-7);
+		return "il " + text.split(", ")[0] + ", la " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " nf") {// amiga nf
+		return "la " + text.substring(0, text.length-3);
+	} else if (text.substring(text.length-3) == " nm") {// amigo nm
+		return "il " + text.substring(0, text.length-3);
+	} else {
+		return text;
+	}
+}
+function addArticlesPortuguese(text) {
+	if (text.substring(text.length-7) == " sm, sf") {// amigo, amiga nm, nf
+		text = text.substring(0, text.length-7);
+		return "o " + text.split(", ")[0] + ", a " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " sf") {// amiga nf
+		return "a " + text.substring(0, text.length-3);
+	} else if (text.substring(text.length-3) == " sm") {// amigo nm
+		return "o " + text.substring(0, text.length-3);
+	} else {
+		return text;
+	}
 }
 
 // get every combination of language abbreviation combos: enes, esen, enzh, zhen, etc...
@@ -265,16 +347,24 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 
 	if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
 		idOrder = [];
+		/**
 		for (let i = 0; i < variable.currentHTML.length; i++) {
 			if (variable.currentHTML.substring(i, i+2) == "id") {
 				idOrder.push(variable.currentHTML.substring(i+4, i+6));
 			}
-		  }
+		}
+		**/
+		for (let i = 0; i < variable.currentHTML.length; i++) {
+			if (variable.currentHTML.substring(i, i+2) == "id" && variable.currentHTML.substring(i+6, i+7) == "\"") {
+				idOrder.push(variable.currentHTML.substring(i+4, i+6));
+			}
+		}
 	}
 
 	console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 });
-chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+							'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
 	capitalize = variable.capitalize;
 	fdTooltips = variable.fdTooltips;
 	ntTooltips = variable.ntTooltips;
@@ -282,6 +372,10 @@ chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthe
 	ftParenthesis = variable.ftParenthesis;
 	ntSameRow = variable.ntSameRow;
 	hntEnabled = variable.hntEnabled;
+
+	fdCapitalize = variable.fdCapitalize;
+	ftCapitalize = variable.ftCapitalize;
+	ntCapitalize = variable.ntCapitalize;
 });
 
 function removeAttributes(text) {
@@ -355,7 +449,7 @@ chrome.runtime.onMessage.addListener(
 		if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
 			idOrder = [];
 			for (let i = 0; i < variable.currentHTML.length; i++) {
-				if (variable.currentHTML.substring(i, i+2) == "id") {
+				if (variable.currentHTML.substring(i, i+2) == "id" && variable.currentHTML.substring(i+6, i+7) == "\"") {
 					idOrder.push(variable.currentHTML.substring(i+4, i+6));
 				}
 			}
@@ -363,7 +457,8 @@ chrome.runtime.onMessage.addListener(
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 
-	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+	  	'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
       	capitalize = variable.capitalize;
       	fdTooltips = variable.fdTooltips;
       	ntTooltips = variable.ntTooltips;
@@ -371,6 +466,10 @@ chrome.runtime.onMessage.addListener(
       	ftParenthesis = variable.ftParenthesis;
       	ntSameRow = variable.ntSameRow;
       	hntEnabled = variable.hntEnabled;
+
+      	fdCapitalize = variable.fdCapitalize;
+		ftCapitalize = variable.ftCapitalize;
+		ntCapitalize = variable.ntCapitalize;
       });
 
       chrome.storage.local.get(['radio1', 'radio2', 'radio3'], function(variable) {
@@ -833,7 +932,8 @@ try {
 				}
 				console.log("currentHntRows: " + currentHntRows);
 
-				chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+				chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+										'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
 					capitalize = variable.capitalize;
 					fdTooltips = variable.fdTooltips;
 					ntTooltips = variable.ntTooltips;
@@ -842,26 +942,42 @@ try {
 					ftParenthesis = variable.ftParenthesis;
 					ntSameRow = variable.ntSameRow;
 					hntEnabled = variable.hntEnabled;
+
+					fdCapitalize = variable.fdCapitalize;
+					ftCapitalize = variable.ftCapitalize;
+					ntCapitalize = variable.ntCapitalize;
                 });
 
 
 				var clipboardHoldText = "";
-				for (let i = 0; i < idOrder.length; i++) {// 10
-					for (let j = 0; j < idWhichTrue.length; j++) {// 3
+				for (let i = 0; i < idOrder.length; i++) {
+					for (let j = 0; j < idWhichTrue.length; j++) {
 						if (idOrder[i].includes(idWhichTrue[j])) {
 							if (idOrder[i] == "fd") {
 								if (fdTooltips == true) {
-									clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+									if (fdCapitalize == true)
+										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2));
+									else
+										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
 								} else {
-									clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+									if (fdCapitalize == true)
+										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
+									else
+										clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 								clipboardHoldText += "\n";
 							} else if (idOrder[i] == "ft") {
 								if (ftParenthesis == true) {
-									clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '');
+									if (ftCapitalize == true)
+										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+									else
+										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '');
 								} else {
-									clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
+									if (ftCapitalize == true)
+										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
+									else
+										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 								clipboardHoldText += "\n";
@@ -888,16 +1004,28 @@ try {
 									//currentTableRow = removeAttributesV2(currentTableRow);
 									if (ntSameRow == true) {
 										if (ntTooltips == true) {
-											clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+											if (ntCapitalize)
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+											else
+												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
 										} else {
-											clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '')
+											if (ntCapitalize)
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+											else
+												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										}
 										clipboardHoldText += ", ";
 									} else {
 										if (ntTooltips == true) {
-											clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+											if (ntCapitalize)
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+											else
+												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
 										} else {
-											clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '')
+											if (ntCapitalize)
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+											else
+												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										}
 										clipboardHoldText += "\n";
 									}
