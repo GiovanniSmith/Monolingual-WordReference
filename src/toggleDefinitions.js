@@ -55,7 +55,6 @@ var ph2 = [];
 var dataPh2 = [];
 var isSomethingImportantMissing = [];
 var isSomethingImportantMissingRowIndexes = [];
-var escucharButton;
 var def = "";
 var countNewRows = 0;
 var countNewRowsSentence = 0;
@@ -72,6 +71,7 @@ var nativeTranslationsRowIndexes = [];
 var nativeSentencesRowIndexes = [];
 var helperNativeTranslationsRowIndexes = [];
 
+var capitalize;
 var fdTooltips;
 var ntTooltips;
 var hntEnabled;
@@ -88,8 +88,8 @@ var hideTextPlaceholder = "[...]";
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
 }
-function createCopyAudioButton() {
-	return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class=\"blueButton\" id=\"copyAudio\">Copy audio</button>";
+function createCopyHeaderWordButton() {
+	return "<button class=\"blueButton\" id=\"copyHeaderWord\">Copy</button>&nbsp;&nbsp;&nbsp;";
 }
 function createNewRow(index) {
 	return "<tr id=\"newRow" + index + "\"><td></td><td></td><td></td></tr>";
@@ -159,7 +159,18 @@ function displayTextWidth(text, font) { // https://www.w3docs.com/snippets/javas
   let metrics = context.measureText(text);
   return metrics.width;
 }
-
+function removeDataPh(number) {
+	return !number.outerHTML.includes("data-ph");
+}
+function capitalizeFirstLetter(text) {
+	var returnThis;
+	if (text.length > 1) {
+		returnThis = text.substring(0, 1).toUpperCase() + text.substring(1);
+	} else {
+		returnThis = text.toUpperCase();
+	}
+	return returnThis;
+}
 
 chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
 	if (variable.radio1 == true)
@@ -167,23 +178,6 @@ chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
 	else if (variable.radio2 == true)
 		hideTextPlaceholder = "{...}";
 });
-
-function equalLengthBrackets(text) {
-	/**
-	var returnThis;
-	var dots = "";
-	if (text.length <= 2) {
-		returnThis = "[]";
-	} else {
-		for (let i = 0; i <= (displayTextWidth(text)/displayTextWidth("a")) + 1; i++) {
-			dots += "a";
-		}
-	}
-	**/
-	return hideTextPlaceholder;
-}
-
-
 
 function arraysEqual(a, b) {
   // https://stackoverflow.com/a/16436975
@@ -280,7 +274,8 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 
 	console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 });
-chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+	capitalize = variable.capitalize;
 	fdTooltips = variable.fdTooltips;
 	ntTooltips = variable.ntTooltips;
 	hntParenthesis = variable.hntParenthesis;
@@ -357,8 +352,6 @@ chrome.runtime.onMessage.addListener(
 			if (variable.b5Status == true)
 				idWhichTrue.push("b5");
 		}
-
-
 		if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
 			idOrder = [];
 			for (let i = 0; i < variable.currentHTML.length; i++) {
@@ -370,7 +363,8 @@ chrome.runtime.onMessage.addListener(
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 
-	  chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+      	capitalize = variable.capitalize;
       	fdTooltips = variable.fdTooltips;
       	ntTooltips = variable.ntTooltips;
       	hntParenthesis = variable.hntParenthesis;
@@ -405,7 +399,7 @@ try {
 	ph = document.getElementsByClassName("ph");
 	notePubl = document.getElementsByClassName("notePubl");
 	isSomethingImportantMissing = document.getElementsByClassName("even more");
-	escucharButton = document.getElementById("listen_widget");
+
 
 	for (i = 0; i < ToWrd.length; i++) {
 		if (!ToWrd[i].innerHTML.includes("sLang_")) {
@@ -417,9 +411,6 @@ catch (exception_var) {
 	console.log(exception_var);
 }
 
-function removeDataPh(number) {
-	return !number.outerHTML.includes("data-ph");
-}
 // fill up the second array beforehand to ensure that later on, the first array doesn't draw from an empty array
 try {
 	for (i = 0; i < ToWrdDef.length; i++) {
@@ -507,12 +498,19 @@ function restoreDefinitions() {
 
 // button stuff
 try {
-	/**
-    escucharButton.insertAdjacentHTML('afterend', createCopyAudioButton());
-	document.getElementById("copyAudio").onclick = async function(e) {
-
+	var headerWord = document.querySelector(".headerWord");
+	headerWord.insertAdjacentHTML('afterend', createCopyHeaderWordButton());
+	copyHeaderWord.onclick = async function(e) {
+		console.log("Copy header word button clicked");
+		if (capitalize == true)
+			clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
+		else
+			clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
+		console.log("capitalize: " + capitalize);
+		console.log("Text copied: " + clipboardHoldText);
+		navigator.clipboard.writeText(clipboardHoldText);
 	}
-	**/
+
 	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {
 			nativeExampleSentenceRowIndexes.push(k);
@@ -541,64 +539,23 @@ try {
 		if (tableRow[k].outerHTML.includes("class=\"ToEx\"")) {
 			exampleSentenceRowIndexes.push(k);
 		}
+
+		for (let i = 0; i < languageCombinations.length; i++) {
+			if (tableRow[k].outerHTML.includes("id=\"" + languageCombinations[i])) {
+				rowStartIndexes.push(k);
+				languageCombinationInPage = languageCombinations[i];
+			}
+		}
 	}
 	strongRowIndexes.shift();
 	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
     nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
     notePublRowIndexes.shift();
     isSomethingImportantMissingRowIndexes.shift();
+    if (rowStartIndexes[0] == 0 && rowStartIndexes[1] == 0)
+    	rowStartIndexes.shift();
 
-	console.log("isSomethingImportantMissingRowIndexes: " + isSomethingImportantMissingRowIndexes);
-    console.log("strongRowIndexes: " + strongRowIndexes);
-    console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
-    console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
-    console.log("notePublRowIndexes: " + notePublRowIndexes);
 
-	for (let k = 0; k < tableRow.length; k++) {// get location of each header row
-		for (let i = 0; i < languageCombinations.length; i++) {// used to be: includes ("esen:")
-        	if (tableRow[k].outerHTML.includes(languageCombinations[i])) {
-				rowStartIndexes.push(k);
-				languageCombinationInPage = languageCombinations[i];
-
-				if (addOneRowToSingleRowDefinitions) {
-					if (countNewRows < strongRowIndexes[strongRowIndexes.length-1]) {
-
-						if (areIntegersAreInOrder([strongRowIndexes[countNewRows], notePublRowTouchingStrongIndexes[countNewRowsNotes],
-							nativeExampleSentenceRowIndexes[countNewRowsSentence],
-							nativeExampleSentenceRowIndexes[countNewRowsSentence+1], strongRowIndexes[countNewRows+1]])) {
-							countNewRowsSentence++;
-							countNewRowsNotes++;
-							modifiedRows.push(rowStartIndexes[countNewRows]);
-                            tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
-						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], notePublRowTouchingStrongIndexes[countNewRowsNotes],
-							nativeExampleSentenceRowIndexes[countNewRowsSentence], strongRowIndexes[countNewRows+1]])) {
-
-							modifiedRows.push(rowStartIndexes[countNewRows]);
-                            tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
-						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
-							nativeExampleSentenceRowIndexes[countNewRowsSentence+1], strongRowIndexes[countNewRows+1]])) {
-							countNewRowsSentence++;
-
-						} else if (areIntegersAreInOrder([strongRowIndexes[countNewRows], strongRowIndexes[countNewRows+1],
-                            nativeExampleSentenceRowIndexes[countNewRowsSentence]])) {
-							countNewRowsSentence--;
-
-						}
-						else if (!areIntegersAreInOrder([strongRowIndexes[countNewRows], nativeExampleSentenceRowIndexes[countNewRowsSentence],
-							strongRowIndexes[countNewRows+1]])) {
-							modifiedRows.push(rowStartIndexes[countNewRows]);
-							tableRow[rowStartIndexes[countNewRows]].insertAdjacentHTML('afterend', createNewRow(countNewRows));
-						} else {
-						}
-
-					}
-					countNewRows++;
-					countNewRowsSentence++;
-				}
-
-			}
-        }
-	}
 
 	for (i = 0; i < ph.length; i++) {
 		if(languageCombinationInPage == "esen:") {
@@ -661,36 +618,25 @@ try {
 	// add an additional row to account for "is something missing" sentence
 	tableRowIndexes.push(tableRowIndexes[tableRowIndexes.length-1]+1);
 
-	console.log("--------");
+	console.log("isSomethingImportantMissingRowIndexes: " + isSomethingImportantMissingRowIndexes);
+	console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
+	console.log("notePublRowIndexes: " + notePublRowIndexes);
 	console.log("strongRowIndexes: " + strongRowIndexes);
 	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
-	// tableRow[rowStartIndexes[rowStartIndexes.indexOf(3)]].insertAdjacentHTML('afterend', '<tr><td></td><td></td><td></td></tr>');
-	console.log("--------");
-
-	console.log("modified rows: " + modifiedRows);
 	console.log("tableRowIndexes: " + tableRowIndexes);
-	console.log("tableRow: " + tableRow);
-	console.log("tableRow.length: " + tableRow.length);
-	console.log("rowDataStartIndexes:");
-	console.log(rowDataStartIndexes);
+	console.log("tableRowIndexes.length: " + tableRowIndexes.length);
+	console.log("rowDataStartIndexes: " + rowDataStartIndexes);
 	console.log("rowDataStartIndexes.length:" + rowDataStartIndexes.length);
-	console.log("strongIndexes:");
-	console.log(strongIndexes);
+	console.log("strongIndexes: " + strongIndexes);
 	console.log("strongIndexes.length: " + strongIndexes.length);
-	console.log("FrEx: ");
-	console.log(FrEx);
 	console.log("FrEx.length: " + FrEx.length);
-	console.log("nativeExampleSentenceIndexes: ");
-	console.log(nativeExampleSentenceIndexes);
+	console.log("nativeExampleSentenceIndexes: " + nativeExampleSentenceIndexes);
 	console.log("nativeExampleSentenceIndexes.length: " + nativeExampleSentenceIndexes.length);
-	console.log("rowStartIndexes: ");
-	console.log(rowStartIndexes);
+	console.log("rowStartIndexes: " + rowStartIndexes);
 	console.log("rowStartIndexes.length: " + rowStartIndexes.length);
-	console.log("nativeExampleSentenceRowIndexes: ");
-	console.log(nativeExampleSentenceRowIndexes);
+	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
 	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
-	console.log("headerRowIndexes: ");
-	console.log(headerRowIndexes);
+	console.log("headerRowIndexes: " + headerRowIndexes);
 
 	var foreignDefinitions = [], foreignDefinitionsNoTooltip = [],
 	foreignTranslations = [], foreignTranslationsNoParenthesis = [],
@@ -751,8 +697,6 @@ try {
 				rowStartIndexesCount++;
 			}
 			if (copyStatus
-			&& !tableRow[k].outerHTML.includes("Additional Translations")
-			&& !tableRow[k].outerHTML.includes("Compound Forms")
 			&& !tableRow[k].outerHTML.includes("langHeader")
 			&& !tableRow[k].outerHTML.includes("wrtopsection")) {
 				for (let p = 0; p < headerRowIndexes.length; p++) {// account for going past bold headers
@@ -889,7 +833,8 @@ try {
 				}
 				console.log("currentHntRows: " + currentHntRows);
 
-				chrome.storage.local.get(['fdTooltips', 'ntTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+				chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled'], function(variable) {
+					capitalize = variable.capitalize;
 					fdTooltips = variable.fdTooltips;
 					ntTooltips = variable.ntTooltips;
 					hntEnabled = variable.hntEnabled;
@@ -930,7 +875,7 @@ try {
 									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
 									var currentTableRowHnt = removeAttributesV3(currentTableRow);
 									currentTableRow = removeAttributesV2(currentTableRow);
-									if (arraysEqual(currentNtRows, currentHntRows)) {
+									if (currentNtRows[r]  == currentHntRows[r]) {
 										if (hntEnabled == true) {
 											if (hntParenthesis == true) {
 												clipboardHoldText += currentTableRowHnt.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '');

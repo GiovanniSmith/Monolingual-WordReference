@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	var generalCopyTab = document.getElementById('generalCopyTab');
     var nitpickyCopyTab = document.getElementById('nitpickyCopyTab');
 
+	var capitalize = document.getElementById('capitalize');
     var fdTooltips = document.getElementById('fdTooltips');
     var ntTooltips = document.getElementById('ntTooltips');
     var hntParenthesis = document.getElementById('hntParenthesis');
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
 				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
-				'hntEnabled', 'radio1', 'radio2', 'click', 'hover'], function(variable) {
+				'hntEnabled', 'radio1', 'radio2', 'click', 'hover', 'capitalize'], function(variable) {
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			chrome.storage.local.set({b2Status: true}, function() {});
 			chrome.storage.local.set({fsStatus: true}, function() {});
 
+			chrome.storage.local.set({capitalize: true}, function() {});
 			chrome.storage.local.set({hntEnabled: true}, function() {});
 			chrome.storage.local.set({hntParenthesis: true}, function() {});
 			chrome.storage.local.set({ftParenthesis: true}, function() {});
@@ -104,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("b4").checked = variable.b4Status;
 		document.getElementById("b5").checked = variable.b5Status;
 
+		document.getElementById("capitalize").checked = variable.capitalize;
 		document.getElementById("fdTooltips").checked = variable.fdTooltips;
 		document.getElementById("ntTooltips").checked = variable.ntTooltips;
 		document.getElementById("hntEnabled").checked = variable.hntEnabled;
@@ -321,6 +324,17 @@ document.querySelector('body').addEventListener('click', function(event) {
 		});
 	}
 
+	capitalize.onclick = async function(e) {
+		let queryOptions = { active: true, currentWindow: true };
+		let tab = await chrome.tabs.query(queryOptions);
+		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+			chrome.storage.local.get(['capitalize'], function(variable) {
+				chrome.storage.local.set({capitalize: capitalize.checked}, function() {});
+				console.log("capitalize: " + capitalize.checked);
+				chrome.tabs.sendMessage(tabs[0].id, {capitalize: variable.capitalize}, function(response) {});
+			});
+		});
+	}
 	fdTooltips.onclick = async function(e) {
 		let queryOptions = { active: true, currentWindow: true };
 		let tab = await chrome.tabs.query(queryOptions);

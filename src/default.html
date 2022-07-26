@@ -21,33 +21,35 @@
         <label class = "text" for="dontShowAgainButtonCheck"><a>Don't show again</a></label><br>
     </div>
     <hr>
-    <button id="toggleCopy" class="toggle">Toggle copy button</button>
+    <button id="toggleCopy" class="toggle">Toggle copy buttons</button>
     <hr>
     <div class="tab">
-        <button class="tablinks" id="clickOrHoverTab">Text settings</button>&nbsp;
-        <button class="tablinks" id="generalCopyTab">Copy Order</button>&nbsp;
+        <button class="tablinks" id="clickOrHoverTab">Text</button>
+        <button class="tablinks" id="generalCopyTab">Copy Order</button>
         <button class="tablinks" id="nitpickyCopyTab">Copy Edit</button>
     </div>
     <div id="clickOrHover" class="tabcontent">
-        <a>
-            Show hidden text on
-            <br>
+        <a>Reveal hidden text on</a>
+        <br>
+        <aNoBold>
             <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="click">
             <label class = "text" for="click">Click</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="hover">
             <label class = "text" for="hover">Hover</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <br>
-            <aRed id="requiresPageReload1">(requires page reload)</aRed>
-            <br>
-            Placeholder for hidden text
-            <br>
+        </aNoBold>
+        <br>
+        <aRed id="requiresPageReload1">(requires page reload)</aRed>
+        <hr>
+        <a>Placeholder for hidden text</a>
+        <br>
+        <aNoBold>
             <input type="radio" name="hideText" class = "text" type="checkbox" id="radio1">
             <label class = "text" for="radio1">[...]</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="radio" name="hideText" class = "text" type="checkbox" id="radio2">
             <label class = "text" for="radio2">{...}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <br>
-            <aRed id="requiresPageReload2">(requires page reload)</aRed>
-        </a>
+        </aNoBold>
+        <br>
+        <aRed id="requiresPageReload2">(requires page reload)</aRed>
     </div>
     <div id="generalCopy" class="tabcontent">
         <div class="wrapper" id="wrapperId">
@@ -113,44 +115,61 @@
         -->
     </div>
     <div id="nitpickyCopy" class="tabcontent">
-        <a>
-            <input class = "text" type="checkbox" id="fdTooltips">
-            <label class = "text" for="fdTooltips">Include grammar when copying foreign definition</label>
-            <aRight title="Enabled:  estudiar vtr&#013;Disabled: estudiar">&nbsp;&nbsp;(?)</aRight><br>
+        <a>Header foreign definition</a>
+        <aRight title="&#09;{comer}&#013;&#013;comer    ingerir, tragar    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;&nbsp;&nbsp;(?)</aRight>
+        <br>
+        <input class = "item" type="checkbox" id="capitalize">
+        <label class = "item" for="capitalize"><aNoBold>Capitalize first letter</aNoBold></label>
+        <hr>
+        <a>Foreign definition</a>
+        <aRight title="{comer}    ingerir, tragar    eat&#013;&#09;&#09;  Hay que comer verduras.&#013;&#09;&#09;  You need to eat vegetables.">&nbsp;&nbsp;(?)</aRight>
+        <br>
+        <input class = "item" type="checkbox" id="fdTooltips">
+        <label class = "item" for="fdTooltips"><aNoBold>Include grammar abbreviations</aNoBold></label>
+        <aRight title="Enabled:  estudiar vtr&#013;Disabled: estudiar">&nbsp;&nbsp;(?)</aRight><br>
+        <hr>
+        <a>Foreign translation</a>
+        <aRight title="comer    {ingerir, tragar}    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">(?)</aRight>
+        <br>
+        <input class = "item" type="checkbox" id="ftParenthesis">
+        <label class = "item" for="ftParenthesis"><aNoBold>Include parenthesis</aNoBold></label>
+        <aRight title="Enabled:  (asimilar conocimientos)&#013;Disabled: asimilar conocimientos">&nbsp;&nbsp;(?)</aRight><br>
+        <hr>
+        <a>Native translation</a>
+        <aRight title="comer    ingerir, tragar    {eat}&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;(?)</aRight>
+        <br>
+        <input class = "item" type="checkbox" id="ntTooltips">
+        <label class = "item" for="ntTooltips"><aNoBold>Include grammar abbreviations</aNoBold></label>
+        <aRight title="Enabled:  look into vi phrasal&#013;          &#09;consider, evaluate vtr&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
 
-            <input class = "text" type="checkbox" id="ntTooltips">
-            <label class = "text" for="ntTooltips">Include grammar when copying native translation</label>
-            <aRight title="Enabled:  look into vi phrasal&#013;          &#09;consider, evaluate vtr&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
+        <input class = "item" type="checkbox" id="ntSameRow">
+        <label class = "item" for="ntSameRow"><aNoBold>Force onto single row</aNoBold></label>
+        <aRight title="Enabled:  look into, consider, evaluate&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
+        <hr>
+        <a>Helper native translation</a>
+        <aRight title="comer    ingerir, tragar    {(food)} eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;(?)</aRight>
+        <br>
+        <input class = "item" type="checkbox" id="hntEnabled">
+        <label class = "item" for="hntEnabled"><aNoBold>Include (if exists) when copying native translation</aNoBold></label>
+        <aRight title="Enabled:  (action) do&#013;Disabled:  do">&nbsp;&nbsp;(?)</aRight><br>
 
-            <input class = "text" type="checkbox" id="hntEnabled">
-            <label class = "text" for="hntEnabled">Include helper native translation (if exists) when copying native translation</label>
-            <aRight title="Enabled:  (action) do&#013;Disabled:  do">&nbsp;&nbsp;(?)</aRight><br>
+        <input class = "item" type="checkbox" id="hntParenthesis">
+        <label class = "item" for="hntParenthesis"><aNoBold>Include parenthesis</aNoBold></label>
+        <aRight title="Enabled:  (action) do&#013;Disabled: action do">&nbsp;&nbsp;(?)</aRight><br>
 
-            <input class = "text" type="checkbox" id="hntParenthesis">
-            <label class = "text" for="hntParenthesis">Include parenthesis when copying helper native translation</label>
-            <aRight title="Enabled:  (action) do&#013;Disabled: action do">&nbsp;&nbsp;(?)</aRight><br>
-
-            <input class = "text" type="checkbox" id="ftParenthesis">
-            <label class = "text" for="ftParenthesis">Include parenthesis when copying foreign translation</label>
-            <aRight title="Enabled:  (asimilar conocimientos)&#013;Disabled: asimilar conocimientos">&nbsp;&nbsp;(?)</aRight><br>
-
-            <input class = "text" type="checkbox" id="ntSameRow">
-            <label class = "text" for="ntSameRow">Put multiple native translations on one row</label>
-            <aRight title="Enabled:  look into, consider, evaluate&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
-        </a>
     </div>
     <hr>
     <a href="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ" target="_blank" title="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ">Donate</a>
     <a href="https://github.com/Giospiral/Monolingual-WordReference" target="_blank" title="https://github.com/Giospiral/Monolingual-WordReference">Github</a>
     <a href="https://www.youtube.com" target="_blank" title="https://www.youtube.com">Video Overview</a>
     <a href="https://forms.gle/vFTEPePBf4brEZ9cA" target="_blank" title="https://forms.gle/vFTEPePBf4brEZ9cA">Bug Report</a>
-    <a href="https://www.wordreference.com" target="_blank" title="https://www.wordreference.com">WordReference.com</a>
     <a>Version: Beta</a>
 </body>
 <script src="drag.js"></script>
 <script src="background.js"></script>
 </html>
 <!--
+
 #130FE2 blue
 #130F6E darker blue
 #FE902D orange
