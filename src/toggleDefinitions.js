@@ -38,7 +38,7 @@ var nativeExampleSentenceRowIndexes = [];
 var nativeExampleSentenceRowIndexesCount;
 var notePublRowIndexes = [];
 var notePublRowTouchingStrongIndexes = [];
-var tempK = 0;
+var findNearestRowStartIndex = 0;
 var headerRowIndexes = [];
 var headerRowOffsetCount = 0;
 var ToWrdDef, ToEx, To2, dsense, pos2_tooltip, ph, dataPh, notePubl, isSomethingImportantMissing;
@@ -89,28 +89,11 @@ var hover;
 
 var hideTextPlaceholder = "[...]";
 
-/**
-spanish: nm, nf (el, la)
-italian: nm, nf (il, la)
-french: nm, nf (le, la)
-portuguese: sm, sf (o, a)
-
-german: nm, nf, nn (der, die, das)
-dutch: ???? (de, de, het)
-swedish: den, den det
-icelandic: ?
-russian: ?
-polish: doesnt exist
-romanian: bruh
-czech: doesnt exist
-
-**/
-
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
 }
 function createCopyHeaderWordButton() {
-	return "<button class=\"blueButton\" id=\"copyHeaderWord\">Copy</button>&nbsp;&nbsp;&nbsp;";
+	return "<button class=\"blueButton\" id=\"copyHeaderWord\">Copy</button><a id=\"copyHeaderWordSpace\">&nbsp;&nbsp;&nbsp;</a>";
 }
 function createNewRow(index) {
 	return "<tr id=\"newRow" + index + "\"><td></td><td></td><td></td></tr>";
@@ -121,18 +104,7 @@ function notEqualToNegativeOne(num) {
 function notEqualToZero(num) {
 	return num != 0;
 }
-function areIntegersAreInOrder(array) {
-	var returnThis = true;
-	for (let i = 0; i < array.length-1; i++) {
-		if(array[i+1] == null) {
-			console.log("areIntegersAreInOrder: index is null: " + i+1);
-		} else if (!(array[i+1] > array[i])) {
-			returnThis = false;
-			break;
-		}
-	}
-	return returnThis;
-}
+
 function addBackslashBeforeApostrophe(text) {
 	if (text.includes("\'")) {
 		for (let i = 0; i < text.length-1; i++) {
@@ -173,17 +145,6 @@ function removeBackslashBeforeApostrophe(text) {
 	}
 }
 
-function displayTextWidth(text, font) { // https://www.w3docs.com/snippets/javascript/how-to-calculate-text-width-with-javascript.html
-  let canvas = displayTextWidth.canvas || (displayTextWidth.canvas = document.createElement("canvas"));
-  let context = canvas.getContext("2d");
-  context.font = font;
-  let metrics = context.measureText(text);
-  return metrics.width;
-}
-function removeDataPh(number) {
-	return !number.outerHTML.includes("data-ph");
-}
-
 function isLetter(str) {// https://stackoverflow.com/a/9862788
   return str.length === 1 && str.match(/[a-z]/i);
 }
@@ -211,70 +172,327 @@ chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
 		hideTextPlaceholder = "{...}";
 });
 
-function addArticles(text, language) {
+function addArticles(text, textWithoutTooltips, language) {
 	switch(language) {
+	  case "en":// why is Portuguese here instead of returning the variable "text"? WordReference is a scuffed site, and I'm lazy
+	  return addArticlesPortuguese(text, textWithoutTooltips, language);
       case "es":
-      return addArticlesSpanish(text);
+      return addArticlesSpanish(text, textWithoutTooltips, language);
       break;
       case "fr":
-      return addArticlesFrench(text);
+      return addArticlesFrench(text, textWithoutTooltips, language);
       break;
       case "it":
-	  return addArticlesItalian(text);
+	  return addArticlesItalian(text, textWithoutTooltips, language);
 	  break;
 	  case "pr":
-      return addArticlesPortuguese(text);
+      return addArticlesPortuguese(text, textWithoutTooltips, language);
 	  break;
       default:
-      return "Error in addArticles()";
+      return "Error in addArticles(): languageCombination of " + language + "was not found.";
     }
 }
-function addArticlesSpanish(text) {
-	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
+function startsWithVowel(text) {
+	return text.substring(0, 1) == "a" || text.substring(0, 1) == "e" || text.substring(0, 1) == "i" ||
+			text.substring(0, 1) == "o" || text.substring(0, 1) == "u";
+}
+function startsWithConsonant(text) {
+	return !startsWithVowel(text);
+}
+function addArticlesHelper(text, partToCutOff, article, language) {
+	console.log("text: " + text);
+	console.log("partToCutOff: " + partToCutOff);
+	console.log("article: " + article);
+	text = text.substring(0, text.length-partToCutOff);
+
+	// https://stackoverflow.com/a/881111
+	var textAddToThis = "";
+	for (let i = 0; i <= (text.match(/,/g) || []).length; i++) {
+		if ((article == "le" || article == "la") && startsWithVowel(text.split(", ")[i]) && language == "fr")// french
+			textAddToThis += "l'" + text.split(", ")[i] + ", ";
+		else if ((text.split(", ")[i].substring(0, 2) == "gn" || text.split(", ")[i].substring(0, 2) == "ps" ||
+			text.split(", ")[i].substring(0, 2) == "pn" || text.split(", ")[i].substring(0, 1) == "x" ||
+			text.split(", ")[i].substring(0, 1) == "y" || text.split(", ")[i].substring(0, 1) == "z" ||
+			(text.split(", ")[i].substring(0, 1) == "s" && startsWithVowel(text.split(", ")[i].substring(1, 2)))) && language == "it") {// italian
+			if (article == "il")
+				textAddToThis += "lo " + text.split(", ")[i] + ", ";
+			else if (article == "i")
+				textAddToThis += "gli " + text.split(", ")[i] + ", ";
+		} else if (startsWithConsonant(text) && language == "it") {// italian
+			if (article == "il")
+				textAddToThis += "il " + text.split(", ")[i] + ", ";
+			if (article == "la")
+				textAddToThis += "la " + text.split(", ")[i] + ", ";
+			if (article == "i")
+				textAddToThis += "i " + text.split(", ")[i] + ", ";
+			if (article == "le")
+				textAddToThis += "le " + text.split(", ")[i] + ", ";
+		} else if (startsWithVowel(text) && language == "it") {// italian
+			if (article == "il")
+				textAddToThis += "l'" + text.split(", ")[i] + ", ";
+			if (article == "i")
+				textAddToThis += "gli" + text.split(", ")[i] + ", ";
+			if (article == "la")
+				textAddToThis += "l'" + text.split(", ")[i] + ", ";
+			if (article == "le")
+				textAddToThis += "le" + text.split(", ")[i] + ", ";
+		} else
+			textAddToThis += article + " " + text.split(", ")[i] + ", ";// default
+	}
+
+	if (textAddToThis.substring(3, 6) == "el " && language == "es")// if text = la buena mesa
+		return textAddToThis.substring(3, textAddToThis.length-2);
+	else if (textAddToThis.substring(3, 6) == "la " && language == "es")// or of the sort
+		return textAddToThis.substring(3, textAddToThis.length-2);
+	else
+		return textAddToThis.substring(0, textAddToThis.length-2);
+}
+
+function addArticlesSpanish(text, textWithoutTooltips, language) {
+	var mascDefArt = "el";
+	var mascDefArtPlural = "los";
+	var femDefArt = "la";
+	var femDefArtPlural = "las";
+
+	var mascAbbrv = "nm";
+	var femAbbrv = "nf";
+	var masc = "m";
+	var fem = "f";
+
+	if (text.substring(text.length-4) == "Copy") {
+		text = text.substring(0, text.length-4);
+	}
+	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
-		return "el " + text.split(", ")[0] + ", la " + text.split(", ")[1];
-	} else if (text.substring(text.length-3) == " nf") {// amiga nf
-		return "la " + text.substring(0, text.length-3);
-	} else if (text.substring(text.length-3) == " nm") {// amigo nm
-		return "el " + text.substring(0, text.length-3);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-16) == " loc nom inv " + masc + "/" + fem) {
+		text = text.substring(0, text.length-16);
+		return mascDefArt + " " + text + ", " + femDefArt + " " + text;
+	} else if (text.substring(text.length-12) == " loc nom " + masc + "pl") {
+		return addArticlesHelper(text, 12, mascDefArtPlural, language);
+	} else if (text.substring(text.length-12) == " loc nom " + fem + "pl") {
+		return addArticlesHelper(text, 12, femDefArtPlural, language);
+	} else if (text.substring(text.length-15) == " loc " + mascAbbrv + ", loc " + femAbbrv) {
+		text = text.substring(0, text.length-15);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-10) == " loc nom " + masc) {
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-10) == " loc nom " + fem) {
+		return addArticlesHelper(text, 10, femDefArt, language);
+	} else if (text.substring(text.length-4) == " n" + masc + fem) {
+		text = text.substring(0, text.length-4);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " n" + masc) {
+		return addArticlesHelper(text, 3, mascDefArt, language);
+	} else if (text.substring(text.length-3) == " n" + fem) {
+		return addArticlesHelper(text, 3, femDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + masc + " + loc adj") {
+		return addArticlesHelper(text, 13, mascDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + fem + " + loc adj") {
+		return addArticlesHelper(text, 13, femDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + masc + " + adj") {
+		return addArticlesHelper(text, 9, mascDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + fem + " + adj") {
+		return addArticlesHelper(text, 9, femDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + masc + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, mascDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + fem + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, femDefArt, language);
+	}  else if (text.substring(text.length-10) == " grupo nom") {
+		return addArticlesHelper(text, 10, mascDefArt, language);
 	} else {
-		return text;
+		return textWithoutTooltips;
 	}
 }
-function addArticlesFrench(text) {
-	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
+function addArticlesFrench(text, textWithoutTooltips, language) {
+	/**
+	le   masculine singular
+    la   feminine singular
+    l'    m or f in front of a vowel or h muet
+    les  m or f plural
+
+    nm, nf
+	**/
+	var mascDefArt = "le";
+	var mascDefArtPlural = "les";
+	var femDefArt = "la";
+	var femDefArtPlural = "les";
+
+	var mascAbbrv = "nm";
+	var femAbbrv = "nf";
+	var masc = "m";
+	var fem = "f";
+
+	if (text.substring(text.length-4) == "Copy") {
+		text = text.substring(0, text.length-4);
+	}
+	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
-		return "le " + text.split(", ")[0] + ", la " + text.split(", ")[1];
-	} else if (text.substring(text.length-3) == " nf") {// amiga nf
-		return "la " + text.substring(0, text.length-3);
-	} else if (text.substring(text.length-3) == " nm") {// amigo nm
-		return "le " + text.substring(0, text.length-3);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-16) == " loc nom inv " + masc + "/" + fem) {
+		text = text.substring(0, text.length-16);
+		return mascDefArt + " " + text + ", " + femDefArt + " " + text;
+	} else if (text.substring(text.length-12) == " loc nom " + masc + "pl") {
+		return addArticlesHelper(text, 12, mascDefArtPlural, language);
+	} else if (text.substring(text.length-12) == " loc nom " + fem + "pl") {
+		return addArticlesHelper(text, 12, femDefArtPlural, language);
+	} else if (text.substring(text.length-15) == " loc " + mascAbbrv + ", loc " + femAbbrv) {
+		text = text.substring(0, text.length-15);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-10) == " loc nom " + masc) {
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-10) == " loc nom " + fem) {
+		return addArticlesHelper(text, 10, femDefArt, language);
+	} else if (text.substring(text.length-4) == " n" + masc + fem) {
+		text = text.substring(0, text.length-4);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " n" + masc) {
+		return addArticlesHelper(text, 3, mascDefArt, language);
+	} else if (text.substring(text.length-3) == " n" + fem) {
+		return addArticlesHelper(text, 3, femDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + masc + " + loc adj") {
+		return addArticlesHelper(text, 13, mascDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + fem + " + loc adj") {
+		return addArticlesHelper(text, 13, femDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + masc + " + adj") {
+		return addArticlesHelper(text, 9, mascDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + fem + " + adj") {
+		return addArticlesHelper(text, 9, femDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + masc + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, mascDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + fem + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, femDefArt, language);
+	} else if (text.substring(text.length-10) == " grupo nom") {
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-10) == " nm + prép") {// all french abbreviations found:
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-10) == " nf + prép") {
+		return addArticlesHelper(text, 10, femDefArt, language);
+	} else if (text.substring(text.length-5) == " nmpl") {
+		return addArticlesHelper(text, 5, mascDefArtPlural, language);
+	} else if (text.substring(text.length-5) == " nfpl") {
+		return addArticlesHelper(text, 5, femDefArtPlural, language);
+	} else if (text.substring(text.length-7) == " nm inv") {
+		return addArticlesHelper(text, 7, mascDefArt, language);
 	} else {
-		return text;
+		return textWithoutTooltips;
 	}
 }
-function addArticlesItalian(text) {
-	if (text.substring(text.length-7) == " nm, nf") {// amigo, amiga nm, nf
-		text = text.substring(0, text.length-7);
-		return "il " + text.split(", ")[0] + ", la " + text.split(", ")[1];
-	} else if (text.substring(text.length-3) == " nf") {// amiga nf
-		return "la " + text.substring(0, text.length-3);
-	} else if (text.substring(text.length-3) == " nm") {// amigo nm
-		return "il " + text.substring(0, text.length-3);
-	} else {
-		return text;
+function addArticlesItalian(text, textWithoutTooltips, language) {
+	/**
+	Masculine
+	Singular	Plural	Rule
+    IL			I		+ any consonant
+    LO			GLI		+ gn, ps, pn, z, x, y, (s + consonant)
+    L'			GLI		+ any vowel
+
+	Feminine
+    Singular	Plural	Rule
+    LA			LE		+ any consonant
+    L'			LE		+ any vowel
+
+    nm, nf
+	**/
+	var mascDefArt = "il";
+	var mascDefArtPlural = "i";
+	var femDefArt = "la";
+	var femDefArtPlural = "le";
+
+	var mascAbbrv = "nm";
+	var femAbbrv = "nf";
+	var masc = "m";
+	var fem = "f";
+
+	if (text.substring(text.length-4) == "Copy") {
+		text = text.substring(0, text.length-4);
 	}
-}
-function addArticlesPortuguese(text) {
-	if (text.substring(text.length-7) == " sm, sf") {// amigo, amiga nm, nf
+	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
-		return "o " + text.split(", ")[0] + ", a " + text.split(", ")[1];
-	} else if (text.substring(text.length-3) == " sf") {// amiga nf
-		return "a " + text.substring(0, text.length-3);
-	} else if (text.substring(text.length-3) == " sm") {// amigo nm
-		return "o " + text.substring(0, text.length-3);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-16) == " loc nom inv " + masc + "/" + fem) {
+		text = text.substring(0, text.length-16);
+		return mascDefArt + " " + text + ", " + femDefArt + " " + text;
+	} else if (text.substring(text.length-12) == " loc nom " + masc + "pl") {
+		return addArticlesHelper(text, 12, mascDefArtPlural, language);
+	} else if (text.substring(text.length-12) == " loc nom " + fem + "pl") {
+		return addArticlesHelper(text, 12, femDefArtPlural, language);
+	} else if (text.substring(text.length-15) == " loc " + mascAbbrv + ", loc " + femAbbrv) {
+		text = text.substring(0, text.length-15);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-10) == " loc nom " + masc) {
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-10) == " loc nom " + fem) {
+		return addArticlesHelper(text, 10, femDefArt, language);
+	} else if (text.substring(text.length-4) == " n" + masc + fem) {
+		text = text.substring(0, text.length-4);
+		if (text.split(", ")[1] == null) {
+			return mascDefArt + " " + text + ", " + femDefArt + " " + text;
+		} else {
+			return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+		}
+	} else if (text.substring(text.length-3) == " n" + masc) {
+		return addArticlesHelper(text, 3, mascDefArt, language);
+	} else if (text.substring(text.length-3) == " n" + fem) {
+		return addArticlesHelper(text, 3, femDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + masc + " + loc adj") {
+		return addArticlesHelper(text, 13, mascDefArt, language);
+	} else if (text.substring(text.length-13) == " n" + fem + " + loc adj") {
+		return addArticlesHelper(text, 13, femDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + masc + " + adj") {
+		return addArticlesHelper(text, 9, mascDefArt, language);
+	} else if (text.substring(text.length-9) == " n" + fem + " + adj") {
+		return addArticlesHelper(text, 9, femDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + masc + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, mascDefArt, language);
+	} else if (text.substring(text.length-12) == " n" + fem + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, femDefArt, language);
+	} else if (text.substring(text.length-10) == " grupo nom") {
+		return addArticlesHelper(text, 10, mascDefArt, language);
+	} else if (text.substring(text.length-5) == " nmpl") {// italian start
+		return addArticlesHelper(text, 5, mascDefArtPlural, language);
+	} else if (text.substring(text.length-5) == " nfpl") {
+		return addArticlesHelper(text, 5, femDefArtPlural, language);
+	} else
+		return textWithoutTooltips;
+}
+function addArticlesPortuguese(text, textWithoutTooltips, language) {
+	// sm, sf, o, a, os, as
+	var mascDefArt = "o";
+	var mascDefArtPlural = "os";
+	var femDefArt = "a";
+	var femDefArtPlural = "as";
+
+	var mascAbbrv = "sm";
+	var femAbbrv = "sf";
+	var masc = "m";
+	var fem = "f";
+
+	if (text.substring(text.length-4) == "Copy") {
+		text = text.substring(0, text.length-4);
+	}
+	if (text.substring(text.length-4) == " s" + masc + fem) {
+		text = text.substring(0, text.length-4);
+		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
+	} else if (text.substring(text.length-3) == " s" + masc) {
+		return addArticlesHelper(text, 3, mascDefArt, language);
+	} else if (text.substring(text.length-3) == " s" + fem) {
+		return addArticlesHelper(text, 3, femDefArt, language);
+	} else if (text.substring(text.length-13) == " s" + masc + " + loc adj") {
+		return addArticlesHelper(text, 13, mascDefArt, language);
+	} else if (text.substring(text.length-13) == " s" + fem + " + loc adj") {
+		return addArticlesHelper(text, 13, femDefArt, language);
+	} else if (text.substring(text.length-9) == " s" + masc + " + adj") {
+		return addArticlesHelper(text, 9, mascDefArt, language);
+	} else if (text.substring(text.length-9) == " s" + fem + " + adj") {
+		return addArticlesHelper(text, 9, femDefArt, language);
+	} else if (text.substring(text.length-12) == " s" + masc + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, mascDefArt, language);
+	} else if (text.substring(text.length-12) == " s" + fem + " + adj " + masc + fem) {
+		return addArticlesHelper(text, 12, femDefArt, language);
+	}  else if (text.substring(text.length-10) == " grupo nom") {
+		return addArticlesHelper(text, 10, mascDefArt, language);
 	} else {
-		return text;
+		return textWithoutTooltips;
 	}
 }
 
@@ -347,14 +565,7 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 
 	if (idOrder != null && variable.hasDOMeverBeenLoaded != null) {
 		idOrder = [];
-		/**
-		for (let i = 0; i < variable.currentHTML.length; i++) {
-			if (variable.currentHTML.substring(i, i+2) == "id") {
-				idOrder.push(variable.currentHTML.substring(i+4, i+6));
-			}
-		}
-		**/
-		for (let i = 0; i < variable.currentHTML.length; i++) {
+		for (let i = 0; i < variable.currentHTML.length; i++) {// lazy programming moment
 			if (variable.currentHTML.substring(i, i+2) == "id" && variable.currentHTML.substring(i+6, i+7) == "\"") {
 				idOrder.push(variable.currentHTML.substring(i+4, i+6));
 			}
@@ -472,13 +683,11 @@ chrome.runtime.onMessage.addListener(
 		ntCapitalize = variable.ntCapitalize;
       });
 
-      chrome.storage.local.get(['radio1', 'radio2', 'radio3'], function(variable) {
+      chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
       	if (variable.radio1 == true)
       		hideTextPlaceholder = "[...]";
       	else if (variable.radio2 == true)
       		hideTextPlaceholder = "{...}";
-      	else if (variable.radio3 == true)
-      		hideTextPlaceholder = "(...)";
       });
     }
 );
@@ -529,7 +738,7 @@ catch (exception_var) {
 	console.log(exception_var);
 }
 
-// hides some html elements to either [...] or a blank
+// hides some html elements with either [...], {...} or a blank
 function removeDefinitions() {
 	try {
 		isTextHidden = true;
@@ -565,10 +774,6 @@ function restoreDefinitions() {
 		isTextHidden = false;
         for (i = 0; i < ToWrdDef.length; i++) {
         	ToWrdDef[i].innerHTML = definitions2[i];
-        	/**
-        	if (isClickSelected && !isTextHidden) {
-				ToWrdDef[i].outerHTML = ToWrdDef[i].outerHTML.replace("onclick", "onmouseenter");
-			}**/
         	ToWrdDef[i].setAttribute(hoverOrClickAttributeName, "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
 			ToWrdDef[i].setAttribute("onmouseleave", "this.innerHTML='" + addBackslashBeforeApostrophe(definitions2[i]) + "';");
         }
@@ -594,22 +799,36 @@ function restoreDefinitions() {
     	console.log("restoreDefinitions() failed: " + exception_var);
     }
 }
-
-// button stuff
 try {
 	var headerWord = document.querySelector(".headerWord");
-	headerWord.insertAdjacentHTML('afterend', createCopyHeaderWordButton());
-	copyHeaderWord.onclick = async function(e) {
-		console.log("Copy header word button clicked");
-		if (capitalize == true)
-			clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
-		else
-			clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
-		console.log("capitalize: " + capitalize);
-		console.log("Text copied: " + clipboardHoldText);
-		navigator.clipboard.writeText(clipboardHoldText);
-	}
+	var copyHeaderWordButton = createCopyHeaderWordButton();
+	headerWord.insertAdjacentHTML('afterend', copyHeaderWordButton);
 
+	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    	  if (copyStatus == true) {
+    	  	document.getElementById("copyHeaderWord").style.visibility = "visible";
+			document.getElementById("copyHeaderWordSpace").style.visibility = "visible";
+			copyHeaderWord.onclick = async function(e) {
+				console.log("Copy header word button clicked");
+				if (capitalize == true)
+					clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
+				else
+					clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
+				console.log("capitalize: " + capitalize);
+				console.log("Text copied: " + clipboardHoldText);
+				navigator.clipboard.writeText(clipboardHoldText);
+			}
+    	  } else {
+    	  	document.getElementById("copyHeaderWord").style.visibility = "hidden";
+    	  	document.getElementById("copyHeaderWordSpace").style.visibility = "hidden";
+    	  }
+	});
+}
+catch (exception_var) {
+	console.log("Issue with creating header definition copy button: " + exception_var);
+}
+
+try {
 	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {
 			nativeExampleSentenceRowIndexes.push(k);
@@ -632,7 +851,7 @@ try {
 				notePublRowTouchingStrongIndexes.push(k);
 			}
 		}
-		if (tableRow[k].outerHTML.includes("Is something important missing? Report an error or suggest an improvement.")) {
+		if (tableRow[k].outerHTML.includes("WRsug")) {
 			isSomethingImportantMissingRowIndexes.push(k);
 		}
 		if (tableRow[k].outerHTML.includes("class=\"ToEx\"")) {
@@ -643,6 +862,7 @@ try {
 			if (tableRow[k].outerHTML.includes("id=\"" + languageCombinations[i])) {
 				rowStartIndexes.push(k);
 				languageCombinationInPage = languageCombinations[i];
+				console.log("languageCombinationInPage: " + languageCombinationInPage);
 			}
 		}
 	}
@@ -653,8 +873,6 @@ try {
     isSomethingImportantMissingRowIndexes.shift();
     if (rowStartIndexes[0] == 0 && rowStartIndexes[1] == 0)
     	rowStartIndexes.shift();
-
-
 
 	for (i = 0; i < ph.length; i++) {
 		if(languageCombinationInPage == "esen:") {
@@ -746,66 +964,53 @@ try {
 	;
 
 	for (let k = 3; k < tableRowIndexes[tableRowIndexes.length-1]; k++) {
-		if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("Traducciones Principales")
-			&& !tableRow[k].outerHTML.includes("Traducciones Compuestos")&& !tableRow[k].outerHTML.includes("Traducciones Adicionales")) {
+		if (tableRow[k].outerHTML.includes("<strong>") && !tableRow[k].outerHTML.includes("wrtopsection")) {
 //			console.log("(1)  " + tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
 //			console.log("(1)# " + tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
 //			console.log("(2) " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
 //			console.log("(2)# " + (tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
-
-//			foreignDefinitions.push(tableRow[k].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
-//			foreignDefinitionsNoTooltip.push(tableRow[k].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
-//			foreignTranslations.push((tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
-//			foreignTranslationsNoParenthesis.push((tableRow[k].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 		}
 		if (tableRow[k].outerHTML.includes("class=\"dsense\"")) {
 //			console.log("(2.5) " + tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
 //			console.log("(2.5)#" + tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
-
-//			helperNativeTranslations.push(tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, ''));
-//			helperNativeTranslationsNoParenthesis.push(tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 			helperNativeTranslationsRowIndexes.push(k);
 		}
 		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">") && !tableRow[k].outerHTML.includes("langHeader")) {
 //			console.log("(3)  " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
 //			console.log("(3)# " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 			nativeTranslationsRowIndexes.push(k);
-//
-//			nativeTranslations.push(tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
-//			nativeTranslationsNoTooltip.push(tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 		}
 		if (tableRow[k].outerHTML.includes("class=\"FrEx\">")) {
 //			console.log("(4)  " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
-
-//			foreignSentences.push(tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
 		}
 		if (tableRow[k].outerHTML.includes("class=\"ToEx\">")) {
 //			console.log("(5)  " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 			nativeSentencesRowIndexes.push(k);
-
-//			nativeSentences.push(tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 		}
 	}
 
 	// copy button
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
 		tableRow[k].onmouseenter = async function(e) {
-			tempK = k;
-			while (!rowStartIndexes.includes(tempK)) {
-				tempK--;
+			findNearestRowStartIndex = k;
+			while (!rowStartIndexes.includes(findNearestRowStartIndex)) {
+				findNearestRowStartIndex--;
 				rowStartIndexesCount++;
 			}
+
 			if (copyStatus
 			&& !tableRow[k].outerHTML.includes("langHeader")
 			&& !tableRow[k].outerHTML.includes("wrtopsection")) {
-				for (let p = 0; p < headerRowIndexes.length; p++) {// account for going past bold headers
+				// account for going past bold headers
+				for (let p = 0; p < headerRowIndexes.length; p++) {
 					if (k > headerRowIndexes[p]) {
 						headerRowOffsetCount = p;
 					} else if (k < headerRowIndexes[0]){
 						headerRowOffsetCount = 0;
 					}
 				}
-				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {// first row of definition
+				// first row of definition
+				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {
 					console.log("First row: " + k);
 					onFirstRow = true;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3)) {
@@ -948,22 +1153,25 @@ try {
 					ntCapitalize = variable.ntCapitalize;
                 });
 
-
+				console.log("languageCombinationInPage: " + languageCombinationInPage);
 				var clipboardHoldText = "";
 				for (let i = 0; i < idOrder.length; i++) {
 					for (let j = 0; j < idWhichTrue.length; j++) {
 						if (idOrder[i].includes(idWhichTrue[j])) {
 							if (idOrder[i] == "fd") {
+								var fdWithoutTooltipsWithCap = capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
+								var fdWithoutTooltipsNoCap = tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+
 								if (fdTooltips == true) {
 									if (fdCapitalize == true)
-										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2));
+										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap, languageCombinationInPage.substring(0, 2)));
 									else
-										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
+										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap, languageCombinationInPage.substring(0, 2));
 								} else {
 									if (fdCapitalize == true)
-										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''));
+										clipboardHoldText += fdWithoutTooltipsWithCap;
 									else
-										clipboardHoldText += tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+										clipboardHoldText += fdWithoutTooltipsNoCap;
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 								clipboardHoldText += "\n";
@@ -989,14 +1197,13 @@ try {
 							} else if (idOrder[i] == "nt") {
 								for (let r = 0; r < currentNtRows.length; r++) {
 									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
-									var currentTableRowHnt = removeAttributesV3(currentTableRow);
 									currentTableRow = removeAttributesV2(currentTableRow);
 									if (currentNtRows[r]  == currentHntRows[r]) {
 										if (hntEnabled == true) {
 											if (hntParenthesis == true) {
-												clipboardHoldText += currentTableRowHnt.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '');
+												clipboardHoldText += removeAttributesV3(currentTableRow).split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '');
 											} else {
-												clipboardHoldText += currentTableRowHnt.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
+												clipboardHoldText += removeAttributesV3(currentTableRow).split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
 											}
 											clipboardHoldText += " ";
 										}
@@ -1050,6 +1257,7 @@ try {
 				nsExists = true;
 				// cut off the last \n since all copies will end in \n
 				clipboardHoldText = clipboardHoldText.substring(0, clipboardHoldText.length-1);
+				// warning if nothing was copied
 				if (clipboardHoldText == "" || clipboardHoldText == "\n" ||
 					clipboardHoldText == "\n\n" || clipboardHoldText == "\n\n\n" ||
 					clipboardHoldText == "\n\n\n\n" || clipboardHoldText == "\n\n\n\n\n") {
@@ -1060,6 +1268,7 @@ try {
 			}
 		}
 	}
+	// remove copy button when mouse goes to another definition
 	for (let m = rowStartIndexes[1]; m <= tableRowIndexes[tableRowIndexes.length-1]; m++) {
 		tableRow[m].onmouseleave = async function(e) {
 			buttonVariable.outerHTML = "";
