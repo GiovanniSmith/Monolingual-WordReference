@@ -65,13 +65,14 @@ var currentRowTheCopyButtonIsOn;
 var textThatIsBeingReplaced = "";
 var idOrder = ["fd","b1","ft","b2","fs","b3","nt","b4","ns","b5"];
 var idWhichTrue = ["ft","b2","fs"];
+var headerWord;
 
 var exampleSentenceRowIndexes = [];
 var nativeTranslationsRowIndexes = [];
 var nativeSentencesRowIndexes = [];
 var helperNativeTranslationsRowIndexes = [];
 
-var capitalize;
+var capitalize = true;
 var fdTooltips;
 var ntTooltips;
 var hntEnabled;
@@ -144,6 +145,11 @@ function removeBackslashBeforeApostrophe(text) {
 		return text;
 	}
 }
+// [96, 99] -> [96, -1, -1, 99]
+function addNegativeOneAndEqualSpacing(array) {
+
+}
+console.log ("look here: " + addNegativeOneAndEqualSpacing([96, 99]));
 
 function isLetter(str) {// https://stackoverflow.com/a/9862788
   return str.length === 1 && str.match(/[a-z]/i);
@@ -507,10 +513,10 @@ for (let i = 0; i < languageAbbreviations.length; i++) {
 chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Status', 'ftStatus',
 						'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 						'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
-						'hover', 'click'], function(variable) {
+						'hover', 'click', 'capitalize'], function(variable) {
 	click = variable.click;
 	hover = variable.hover;
-
+	capitalize = variable.capitalize;
 	if (hover)
 		hoverOrClickAttributeName = "onmouseenter";
 	else if (click)
@@ -537,6 +543,24 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 		chrome.storage.local.set({toggleCopy: false}, function() {});
 		copyStatus = true;
 	}
+
+	if (copyStatus == true) {
+		document.getElementById("copyHeaderWord").style.visibility = "visible";
+		document.getElementById("copyHeaderWordSpace").style.visibility = "visible";
+		copyHeaderWord.onclick = async function(e) {
+			console.log("Copy header word button clicked");
+			if (capitalize == true)
+				clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
+			else
+				clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
+			console.log("capitalize: " + capitalize);
+			console.log("Text copied: " + clipboardHoldText);
+			navigator.clipboard.writeText(clipboardHoldText);
+		}
+	  } else {
+		document.getElementById("copyHeaderWord").style.visibility = "hidden";
+		document.getElementById("copyHeaderWordSpace").style.visibility = "hidden";
+	  }
 
 	if (idWhichTrue != null && variable.hasDOMeverBeenLoaded != null) {
 		idWhichTrue = [];
@@ -595,7 +619,6 @@ function removeAttributes(text) {
 	text = text.replace(" " + hoverOrClickAttributeName + "=\"this.innerHTML=\'", ">");
 	return text;
 }
-
 function removeAttributesV2(text) {
 	text = text.replace(" " + hoverOrClickAttributeName + "=\"this.innerHTML=\'\';\" onmouseleave=\"this.innerHTML=\'\'\" style=\"text-align:right\"", "\"");
 	text = text.replace(" " + hoverOrClickAttributeName + "=\"this.innerHTML=\'", ">");
@@ -604,7 +627,6 @@ function removeAttributesV2(text) {
 	text = text.replace("&quot;", "\"");
 	return text;
 }
-
 function removeAttributesV3(text) {
 	text = text.replace(" " + hoverOrClickAttributeName + "=\"this.innerHTML=\'", ">");
 	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'" + hideTextPlaceholder + "\'\" style=\"text-align:right\">" + hideTextPlaceholder, "");
@@ -668,6 +690,8 @@ chrome.runtime.onMessage.addListener(
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 
+
+
 	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
 	  	'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
       	capitalize = variable.capitalize;
@@ -708,6 +732,9 @@ try {
 	notePubl = document.getElementsByClassName("notePubl");
 	isSomethingImportantMissing = document.getElementsByClassName("even more");
 
+	headerWord = document.querySelector(".headerWord");
+	var copyHeaderWordButton = createCopyHeaderWordButton();
+	headerWord.insertAdjacentHTML('afterend', copyHeaderWordButton);
 
 	for (i = 0; i < ToWrd.length; i++) {
 		if (!ToWrd[i].innerHTML.includes("sLang_")) {
@@ -799,34 +826,7 @@ function restoreDefinitions() {
     	console.log("restoreDefinitions() failed: " + exception_var);
     }
 }
-try {
-	var headerWord = document.querySelector(".headerWord");
-	var copyHeaderWordButton = createCopyHeaderWordButton();
-	headerWord.insertAdjacentHTML('afterend', copyHeaderWordButton);
 
-	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    	  if (copyStatus == true) {
-    	  	document.getElementById("copyHeaderWord").style.visibility = "visible";
-			document.getElementById("copyHeaderWordSpace").style.visibility = "visible";
-			copyHeaderWord.onclick = async function(e) {
-				console.log("Copy header word button clicked");
-				if (capitalize == true)
-					clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
-				else
-					clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
-				console.log("capitalize: " + capitalize);
-				console.log("Text copied: " + clipboardHoldText);
-				navigator.clipboard.writeText(clipboardHoldText);
-			}
-    	  } else {
-    	  	document.getElementById("copyHeaderWord").style.visibility = "hidden";
-    	  	document.getElementById("copyHeaderWordSpace").style.visibility = "hidden";
-    	  }
-	});
-}
-catch (exception_var) {
-	console.log("Issue with creating header definition copy button: " + exception_var);
-}
 
 try {
 	for (let k = 0; k < tableRow.length; k++) {
@@ -1197,7 +1197,9 @@ try {
 							} else if (idOrder[i] == "nt") {
 								for (let r = 0; r < currentNtRows.length; r++) {
 									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
-									currentTableRow = removeAttributesV2(currentTableRow);
+									console.log("currentNtRows[r]: " + currentNtRows[r]);
+									console.log("currentHntRows[r]: " + currentHntRows[r]);
+									// make sure that currentHntRows is the same length as currentNtRows
 									if (currentNtRows[r]  == currentHntRows[r]) {
 										if (hntEnabled == true) {
 											if (hntParenthesis == true) {
