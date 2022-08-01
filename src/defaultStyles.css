@@ -9,155 +9,68 @@ largeText {
 	font-family: Cabin;
 	font-size: 18.6px;
 	user-select: none;
-	text-shadow: 0px 1px #000000;
+	text-shadow:
+      -0.5px -0.5px 0 #000,
+      0.5px -0.5px 0 #000,
+      -0.5px 0.5px 0 #000,
+      0.5px 1px 0 #000;
 }
 a {
     color: white;
-	font-weight: bold;
 	font-family: Cabin;
 	font-size: 10px;
 	text-align: center;
 	user-select: none;
-	text-shadow: 0px 1px #000000;
 }
-aNoBold {
+aWithOutline {
     color: white;
 	font-family: Cabin;
 	font-size: 10px;
 	text-align: center;
 	user-select: none;
-	text-shadow: 0px 1px #000000;
+	text-shadow:
+      -0.5px -0.5px 0 #000,
+      0.5px -0.5px 0 #000,
+      -0.5px 0.5px 0 #000,
+      0.5px 1px 0 #000;
 }
 aRight {
     color: white;
-	font-weight: bold;
 	font-family: Cabin;
 	font-size: 10px;
 	text-align: right;
 	user-select: none;
-	text-shadow: 0px 1px #000000;
-}
-aSelect {
-    color: white;
-	font-weight: bold;
-	font-family: Cabin;
-	font-size: 10px;
-	text-align: center;
-	text-shadow: 0px 1px #000000;
-}
-aSmall {
-    color: white;
-	font-weight: bold;
-	font-family: Cabin;
-	font-size: 8px;
-	text-align: center;
-	text-shadow: 0px 1px #000000;
-}
-a2 {
-    color: white;
-	font-weight: bold;
-	font-family: Cabin;
-	font-size: 15px;
-	text-align: center;
-	user-select: none;
-	text-shadow: 0px 1px #000000;
 }
 aRed {
     color: #FFF200;
-	font-weight: bold;
 	font-family: Cabin;
 	font-size: 10px;
 	text-align: center;
 	user-select: none;
 	text-shadow: 0px 1px red;
 }
-smallTextUnClickable {
-    color: white;
-	font-weight: bold;
-	font-family: Cabin;
-	font-size: 10px;
-	text-align: center;
-	user-select: none;
-	text-shadow: 0px 1px #000000;
-}
-h1 {
-    color: white;
-	font-family: Cabin;
-	font-size: 14px;
-	text-align: center;
-	user-select: none;
-	text-shadow: 0px 1px #000000;
-}
 
-button.toggle {
-  background-color: #FE902D;
+button.toggle {/** fe902d #5e58c6  **/
+  background-color: #fe902d;
   border: 3;
   border-color: white;
   color: white;
   padding: 5px 5px;
   font-size: 18px;
   font-family: Cabin;
-
   cursor: pointer;
   width:230px;
   height:60px;
-  text-shadow: 0px 1px #000000;
+  text-shadow:
+  -0.5px -0.5px 0 #000,
+  0.5px -0.5px 0 #000,
+  -0.5px 0.5px 0 #000,
+  0.5px 1px 0 #000;
 }
 button.toggle:hover {
   	background-color: #ffaa5e;
 }
 button.toggle:active {
-	background-color: #c77123;
-}
-
-button.toggleGrayedOut {
-  background-color: #9b9b9b;
-  color: white;
-  padding: 5px 5px;
-  font-size: 18px;
-  font-family: Cabin;
-  cursor: context-menu;
-  width:230px;
-  height:60px;
-  text-shadow: 0px 1px #000000;
-}
-
-button.move {
-  background-color: #7a7a7a;
-  border: 3;
-  border-color: white;
-  color: white;
-  padding: 5px 5px;
-  font-size: 16px;
-  font-family: Cabin;
-  cursor: pointer;
-  width:14px;
-  height:14px;
-}
-button.move:hover {
-  	background-color: #bababa;
-}
-button.move:active {
-	background-color: #3a3a3a;
-}
-
-button.save {
-  background-color: #FE902D;
-  border: 3;
-  border-color: white;
-  color: white;
-  padding: 2px 2px;
-  font-size: 12px;
-  font-family: Cabin;
-  cursor: pointer;
-  width:120px;
-  height:24px;
-  text-shadow: 0px 1px #000000;
-}
-button.save:hover {
-  	background-color: #ffaa5e;
-}
-button.save:active {
 	background-color: #c77123;
 }
 
@@ -172,7 +85,11 @@ button.small {
   cursor: pointer;
   width:40px;
   height:24px;
-  text-shadow: 0px 1px #000000;
+  text-shadow:
+  -0.5px -0.5px 0 #000,
+  0.5px -0.5px 0 #000,
+  -0.5px 0.5px 0 #000,
+  0.5px 1px 0 #000;
 }
 button.small:hover {
   	background-color: #ffaa5e;
@@ -191,7 +108,11 @@ button.small2 {
   font-family: Cabin;
   cursor: pointer;
   height:24px;
-  text-shadow: 0px 1px #000000;
+  text-shadow:
+  -0.5px -0.5px 0 #000,
+  0.5px -0.5px 0 #000,
+  -0.5px 0.5px 0 #000,
+  0.5px 1px 0 #000;
 }
 button.small2:hover {
   	background-color: #ffaa5e;
@@ -199,17 +120,22 @@ button.small2:hover {
 button.small2:active {
 	background-color: #c77123;
 }
+
 button.tablinks {
   background-color: #FE902D;
   border: 3;
   border-color: white;
   color: white;
-  padding: 2px 1;
   font-size: 12px;
   font-family: Cabin;
   cursor: pointer;
   height:24px;
-  text-shadow: 0px 1px #000000;
+  padding: 3px 9.45px;
+  text-shadow:
+  -0.5px -0.5px 0 #000,
+  0.5px -0.5px 0 #000,
+  -0.5px 0.5px 0 #000,
+  0.5px 1px 0 #000;
 }
 button.tablinks:hover {
   	background-color: #ffaa5e;
@@ -340,9 +266,7 @@ body{
   justify-content: space-between;
   /**font-size: 12px;**/
   font-family: Cabin;
-  text-shadow: 0px 1px #000000;
   background-color: #5e58c6;
-  font-weight: bold;
 }
 .wrapper .item:last-child{
   margin-bottom: 0px;
@@ -375,7 +299,6 @@ body{
   justify-content: space-between;
   font-size: 12px;
   font-family: Cabin;
-  text-shadow: 0px 1px #000000;
   background-color: #5e58c6;
 }
 .wrapper .itemGray:last-child{
@@ -398,35 +321,7 @@ body{
   background-color: #5e58c6;
   cursor: context-menu;
   /** #5e58c6 **/
-}
-
-/* Style the buttons that are used to open the tab content */
-.tab button {
-	/**
-  background-color: #FE902D;
-  float: left;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 15px 15px;
-
-  transition: 0.3s;
-  font-size: 8px;
-  **/
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-/**
-  background-color: #ddd;
-  **/
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-/**
-  background-color: #ccc;
-  **/
+  font-size: 0;
 }
 
 /* Style the tab content */
@@ -437,7 +332,7 @@ body{
   border-top: none;
 }
 .tabcontent {
-  animation: fadeEffect 0.3s;
+  animation: fadeEffect 0.2s;
 }
 
 /* Go from zero to full opacity */

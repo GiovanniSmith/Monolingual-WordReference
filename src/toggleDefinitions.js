@@ -11,7 +11,6 @@ var ntExists = true;
 var nsExists = true;
 var isTextHidden = true;
 var isClickSelected = false;
-var addOneRowToSingleRowDefinitions = false;// very important, it's basically a setting
 var languageAbbreviations = ["en", "es", "fr", "pt", "it", "de", "nl", "sv", "ru",
 							"pl", "ro", "cz", "gr", "tr", "zh", "ja", "ko", "ar", "is"];// didn't do ca
 var languageCombinations = [];
@@ -145,11 +144,6 @@ function removeBackslashBeforeApostrophe(text) {
 		return text;
 	}
 }
-// [96, 99] -> [96, -1, -1, 99]
-function addNegativeOneAndEqualSpacing(array) {
-
-}
-console.log ("look here: " + addNegativeOneAndEqualSpacing([96, 99]));
 
 function isLetter(str) {// https://stackoverflow.com/a/9862788
   return str.length === 1 && str.match(/[a-z]/i);
@@ -380,7 +374,9 @@ function addArticlesFrench(text, textWithoutTooltips, language) {
 		return addArticlesHelper(text, 5, femDefArtPlural, language);
 	} else if (text.substring(text.length-7) == " nm inv") {
 		return addArticlesHelper(text, 7, mascDefArt, language);
-	} else {
+	} else if (text.substring(text.length-7) == " nf inv") {
+        return addArticlesHelper(text, 7, femDefArt, language);
+    } else {
 		return textWithoutTooltips;
 	}
 }
@@ -1154,6 +1150,7 @@ try {
                 });
 
 				console.log("languageCombinationInPage: " + languageCombinationInPage);
+				var noTextWasCollected = false;
 				var clipboardHoldText = "";
 				for (let i = 0; i < idOrder.length; i++) {
 					for (let j = 0; j < idWhichTrue.length; j++) {
@@ -1187,20 +1184,22 @@ try {
 									else
 										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
 								}
-								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
-								clipboardHoldText += "\n";
+                                clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
+                                clipboardHoldText += "\n";
+
 							} else if (idOrder[i] == "fs" && fsExists) {
 								for (let r = 0; r < currentFsRows.length; r++) {
 									clipboardHoldText += tableRow[currentFsRows[r]].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0] + "\n";
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 							} else if (idOrder[i] == "nt") {
+							    var rForHnt = 0;
 								for (let r = 0; r < currentNtRows.length; r++) {
 									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
 									console.log("currentNtRows[r]: " + currentNtRows[r]);
 									console.log("currentHntRows[r]: " + currentHntRows[r]);
 									// make sure that currentHntRows is the same length as currentNtRows
-									if (currentNtRows[r]  == currentHntRows[r]) {
+									if (currentNtRows[r]  == currentHntRows[rForHnt]) {
 										if (hntEnabled == true) {
 											if (hntParenthesis == true) {
 												clipboardHoldText += removeAttributesV3(currentTableRow).split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '');
@@ -1209,38 +1208,46 @@ try {
 											}
 											clipboardHoldText += " ";
 										}
+										rForHnt++;
 									}
-									//currentTableRow = removeAttributesV2(currentTableRow);
+									var splitWithThis;
+                                    // <td class="ToWrd" onclick="this.innerHTML='
+                                    if (removeAttributesV2(currentTableRow).includes("<td class=\"ToWrd\" onclick=\"this.innerHTML=\'"))
+                                        splitWithThis = "<td class=\"ToWrd\" onclick=\"this.innerHTML=\'";
+                                    else
+                                        splitWithThis = "<td class=\"ToWrd\">";
+
 									if (ntSameRow == true) {
 										if (ntTooltips == true) {
 											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
 											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
 										} else {
 											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
+												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										}
 										clipboardHoldText += ", ";
 									} else {
 										if (ntTooltips == true) {
 											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
 											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
+												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
 										} else {
 											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
+												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										}
 										clipboardHoldText += "\n";
 									}
 								}
 								if (ntSameRow == true)
 									clipboardHoldText = clipboardHoldText.substring(0, clipboardHoldText.length-2);
+
 								clipboardHoldText += "\n";
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 							} else if (idOrder[i] == "ns" && nsExists) {
@@ -1259,11 +1266,18 @@ try {
 				nsExists = true;
 				// cut off the last \n since all copies will end in \n
 				clipboardHoldText = clipboardHoldText.substring(0, clipboardHoldText.length-1);
-				// warning if nothing was copied
+				// if clipboardHoldText contains nothing or a bunch of \n's, then nothing was copied
 				if (clipboardHoldText == "" || clipboardHoldText == "\n" ||
 					clipboardHoldText == "\n\n" || clipboardHoldText == "\n\n\n" ||
 					clipboardHoldText == "\n\n\n\n" || clipboardHoldText == "\n\n\n\n\n") {
-					clipboardHoldText = "Error: Nothing was copied. Are there only spaces checked, or is nothing checked at all?";
+					// didn't even try to copy anything
+					if (idWhichTrue.includes("b1") || idWhichTrue.includes("b2") || idWhichTrue.includes("b3") ||
+					    idWhichTrue.includes("b4") || idWhichTrue.includes("b5"))
+					    clipboardHoldText = "Nothing copied. Check the copy settings. Are there only spaces checked, or is nothing checked at all?";
+					else {
+					    // tried to copy text but nothing was there
+					    clipboardHoldText = "";
+					}
 				}
 				navigator.clipboard.writeText(clipboardHoldText);
 				console.log("Text copied:\n" + clipboardHoldText);

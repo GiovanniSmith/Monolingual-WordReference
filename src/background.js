@@ -1,3 +1,4 @@
+const version = "0.0.9";
 // tab stuff
 function openTab(evt, cityName) {
   // Declare all variables
@@ -14,61 +15,92 @@ function openTab(evt, cityName) {
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].className = tablinks[i].className.replace(" active", "");
   }
+    chrome.storage.local.get(['firstTime'], function(variable) {
+        if (variable.firstTime == false || variable.firstTime == null) {
+            document.getElementById("fd").checked = false;
+            document.getElementById("ft").checked = true;
+            document.getElementById("fs").checked = true;
+            document.getElementById("nt").checked = false;
+            document.getElementById("ns").checked = false;
+
+            document.getElementById("b1").checked = false;
+            document.getElementById("b2").checked = true;
+            document.getElementById("b3").checked = false;
+            document.getElementById("b4").checked = false;
+            document.getElementById("b5").checked = false;
+
+            document.getElementById("capitalize").checked = true;
+            document.getElementById("hntEnabled").checked = true;
+            document.getElementById("hntParenthesis").checked = true;
+            document.getElementById("ftParenthesis").checked = true;
+            document.getElementById("ntSameRow").checked = true;
+
+            document.getElementById("radio1").checked = true;
+            document.getElementById("radio2").checked = false;
+            document.getElementById("click").checked = true;
+            document.getElementById("hover").checked = false;
+        }
+    });
 
   // Show the current tab, and add an "active" class to the button that opened the tab
   document.getElementById(cityName).style.display = "block";
   evt.currentTarget.className += " active";
 }
 
-
 // when the extension pop-up is opened
 document.addEventListener('DOMContentLoaded', function() {
 	console.log("document.addEventListener('DOMContentLoaded', function()");
 
-	var fd = document.getElementById('fd');
-	var ft = document.getElementById('ft');
-	var fs = document.getElementById('fs');
-	var nd = document.getElementById('nd');
-	var ns = document.getElementById('ns');
+	const fd = document.getElementById('fd');
+	const ft = document.getElementById('ft');
+	const fs = document.getElementById('fs');
+	const nd = document.getElementById('nd');
+	const ns = document.getElementById('ns');
 
-	var b1 = document.getElementById('b1');
-	var b2 = document.getElementById('b2');
-	var b3 = document.getElementById('b3');
-	var b4 = document.getElementById('b4');
-	var b5 = document.getElementById('b5');
+	const b1 = document.getElementById('b1');
+	const b2 = document.getElementById('b2');
+	const b3 = document.getElementById('b3');
+	const b4 = document.getElementById('b4');
+	const b5 = document.getElementById('b5');
 
-	var fdCapitalize = document.getElementById('fdCapitalize');
-	var ftCapitalize = document.getElementById('ftCapitalize');
-	var ndCapitalize = document.getElementById('ndCapitalize');
+	const fdCapitalize = document.getElementById('fdCapitalize');
+	const ftCapitalize = document.getElementById('ftCapitalize');
+	const ndCapitalize = document.getElementById('ndCapitalize');
 
-	var saveChanges = document.getElementById('saveChanges');
-	var warningForClick = document.getElementById('warningForClick');
-	var item = document.querySelector('.item');
+	const saveChanges = document.getElementById('saveChanges');
+	const warningForClick = document.getElementById('warningForClick');
+	const item = document.querySelector('.item');
 
 	const sendMessageButton = document.getElementById('toggleDefinitions');
 	const sendMessageButton2 = document.getElementById('toggleCopy');
-	var generalCopyTab = document.getElementById('generalCopyTab');
-    var nitpickyCopyTab = document.getElementById('nitpickyCopyTab');
+	const generalCopyTab = document.getElementById('generalCopyTab');
+    const nitpickyCopyTab = document.getElementById('nitpickyCopyTab');
+    const clickOrHoverTab = document.getElementById('clickOrHoverTab');
+    const miscTab = document.getElementById('miscTab');
+    const copyVariables = document.getElementById('copyVariables');
 
-	var capitalize = document.getElementById('capitalize');
-    var fdTooltips = document.getElementById('fdTooltips');
-    var ntTooltips = document.getElementById('ntTooltips');
-    var hntParenthesis = document.getElementById('hntParenthesis');
-    var ftParenthesis = document.getElementById('ftParenthesis');
-    var ntSameRow = document.getElementById('ntSameRow');
+	const capitalize = document.getElementById('capitalize');
+    const fdTooltips = document.getElementById('fdTooltips');
+    const ntTooltips = document.getElementById('ntTooltips');
+    const hntParenthesis = document.getElementById('hntParenthesis');
+    const ftParenthesis = document.getElementById('ftParenthesis');
+    const ntSameRow = document.getElementById('ntSameRow');
 
-    var click = document.getElementById('click');
-    var hover = document.getElementById('hover');
-    var radio1 = document.getElementById('radio1');
-    var radio2 = document.getElementById('radio2');
+    const click = document.getElementById('click');
+    const hover = document.getElementById('hover');
+    const radio1 = document.getElementById('radio1');
+    const radio2 = document.getElementById('radio2');
 
 	generalCopyTab.click();
 
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
-				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded',
+				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded', 'firstTime',
 				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
 				'hntEnabled', 'radio1', 'radio2', 'click', 'hover', 'capitalize',
-				'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
+				'fdCapitalize', 'ftCapitalize', 'ntCapitalize', 'toggleDefinitions', 'toggleCopy'], function(variable) {
+		if (variable.hasDOMeverBeenLoaded == true)
+		    chrome.storage.local.set({firstTime: true}, function() {});
+
 		chrome.storage.local.set({currentHTML: document.getElementById("wrapperId").innerHTML}, function() {});
 		chrome.storage.local.set({hasDOMeverBeenLoaded: true}, function() {});
 
@@ -128,6 +160,39 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("click").checked = variable.click;
 		document.getElementById("hover").checked = variable.hover;
 		//saveChanges.click();
+
+		copyVariables.onclick = async function(e) {
+		    console.log("Variables copied to clipboard.");
+            navigator.clipboard.writeText("v" + version +
+                                          "\ntoggleDefinitions: " + variable.toggleDefinitions +
+                                          "\ntoggleCopy: " + variable.toggleCopy +
+                                          "\nfdStatus: " + variable.fdStatus +
+                                          "\nftStatus: " + variable.ftStatus +
+                                          "\nfsStatus: " + variable.fsStatus +
+                                          "\nntStatus: " + variable.ntStatus +
+                                          "\nnsStatus: " + variable.nsStatus +
+                                          "\nb1Status: " + variable.b1Status +
+                                          "\nb2Status: " + variable.b2Status +
+                                          "\nb3Status: " + variable.b3Status +
+                                          "\nb4Status: " + variable.b4Status +
+                                          "\nb5Status: " + variable.b5Status +
+                                          "\nfdCapitalize: " + variable.fdCapitalize +
+                                          "\nftCapitalize: " + variable.ftCapitalize +
+                                          "\nntCapitalize: " + variable.ntCapitalize +
+                                          "\ncapitalize: " + variable.capitalize +
+                                          "\nfdTooltips: " + variable.fdTooltips +
+                                          "\nntTooltips: " + variable.ntTooltips +
+                                          "\nhntEnabled: " + variable.hntEnabled +
+                                          "\nftParenthesis: " + variable.ftParenthesis +
+                                          "\nntSameRow: " + variable.ntSameRow +
+                                          "\nradio1: " + variable.radio1 +
+                                          "\nradio2: " + variable.radio2 +
+                                          "\nclick: " + variable.click +
+                                          "\nhover: " + variable.hover +
+                                          "\ndontShowAgain: " + variable.dontShowAgain +
+                                          "\nhasDOMeverBeenLoaded: " + variable.hasDOMeverBeenLoaded
+                                           );
+        }
 	});
 
 	saveChanges.onclick = async function(e) {
@@ -187,6 +252,13 @@ document.addEventListener('DOMContentLoaded', function() {
 			openTab(e, 'clickOrHover');
 		});
 	}
+	miscTab.onclick = async function(e) {
+        let queryOptions = { active: true, currentWindow: true };
+        let tab = await chrome.tabs.query(queryOptions);
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+            openTab(e, 'misc');
+        });
+    }
 }, false);
 
 const dragArea = document.querySelector(".wrapper");

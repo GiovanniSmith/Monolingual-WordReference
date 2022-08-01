@@ -21,7 +21,11 @@
   display: inline-block;
   font-size: 5px;
   font-family: Cabin;
-  text-shadow: 0px 1px #000000;
+  text-shadow:
+    -0.5px -0.5px 0 #000,
+    0.5px -0.5px 0 #000,
+    -0.5px 0.5px 0 #000,
+    0.5px 1px 0 #000;
 }
 .blueButton:hover {
   background-color: #6E67E5;

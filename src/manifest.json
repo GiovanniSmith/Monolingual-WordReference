@@ -2,8 +2,8 @@
   "manifest_version": 3,
 
   "name": "Monolingual WordReference",
-  "description": "Hide native language translations in the WordReference dictionary, along with other features.",
-  "version": "1.0.0",
+  "description": "Hides native language text in WordReference, along with other tweaks.",
+  "version": "0.0.0",
   "icons": {
     "16": "WordReference Logo 16x PNG.png",
     "48": "WordReference Logo 48x PNG.png",
@@ -26,7 +26,7 @@
     {
       "matches": [
         "https://www.wordreference.com/*"],
-      "js": ["toggleDefinitions.js", "toggleCopyButton.js"],
+      "js": ["toggleDefinitions.js"],
       "css": ["pageStyles.css"],
       "run_at": "document_end",
       "persistent": true

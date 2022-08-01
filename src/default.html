@@ -25,29 +25,30 @@
     <hr>
     <div class="tab">
         <button class="tablinks" id="clickOrHoverTab">Text</button>
-        <button class="tablinks" id="generalCopyTab">Copy Order</button>
-        <button class="tablinks" id="nitpickyCopyTab">Copy Edit</button>
+        <button class="tablinks" id="generalCopyTab">Order</button>
+        <button class="tablinks" id="nitpickyCopyTab">Order style</button>
+        <button class="tablinks" id="miscTab">Other</button>
     </div>
     <div id="clickOrHover" class="tabcontent">
         <a>Reveal hidden text on</a>
         <br>
-        <aNoBold>
+        <a>
             <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="click">
             <label class = "text" for="click">Click</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="radio" name="clickOrHoverRadios" class = "text" type="checkbox" id="hover">
             <label class = "text" for="hover">Hover</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </aNoBold>
+        </a>
         <br>
         <aRed id="requiresPageReload1">(requires page reload)</aRed>
         <hr>
-        <a>Placeholder for hidden text</a>
+        <a>Hide text as</a>
         <br>
-        <aNoBold>
+        <a>
             <input type="radio" name="hideText" class = "text" type="checkbox" id="radio1">
             <label class = "text" for="radio1">[...]</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="radio" name="hideText" class = "text" type="checkbox" id="radio2">
             <label class = "text" for="radio2">{...}</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        </aNoBold>
+        </a>
         <br>
         <aRed id="requiresPageReload2">(requires page reload)</aRed>
     </div>
@@ -127,15 +128,15 @@
         <aRight title="&#09;{comer}&#013;&#013;comer    ingerir, tragar    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;&nbsp;&nbsp;(?)</aRight>
         <br>
         <input class = "item" type="checkbox" id="capitalize">
-        <label class = "item" for="capitalize"><aNoBold>Capitalize first letter</aNoBold></label>
+        <label class = "item" for="capitalize"><a>Capitalize first letter</a></label>
         <hr>
         <a>Foreign definition</a>
         <aRight title="{comer}    ingerir, tragar    eat&#013;&#09;&#09;  Hay que comer verduras.&#013;&#09;&#09;  You need to eat vegetables.">&nbsp;&nbsp;(?)</aRight>
         <br>
         <input class = "item" type="checkbox" id="fdTooltips">
-        <label class = "item" for="fdTooltips"><aNoBold>Generate definite articles</aNoBold></label>
+        <label class = "item" for="fdTooltips"><a>Generate definite articles</a></label>
         <aRed title="This feature only works for Spanish, French, Italian and Portuguese; support for more languages coming in the future.
-Articles are generated from the respective grammar abbreviations (E.g. nm, nf).
+Articles are generated from the respective grammar abbreviations (e.g. nm, nf).
 It cannot account for irregular words, so use with caution.">&nbsp;&nbsp;(!)</aRed>
         <aRight title="Enabled:  el amigo, la amiga&#013;Disabled: amigo, amiga">&nbsp;(?)</aRight><br>
         <hr>
@@ -143,31 +144,50 @@ It cannot account for irregular words, so use with caution.">&nbsp;&nbsp;(!)</aR
         <aRight title="comer    {ingerir, tragar}    eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">(?)</aRight>
         <br>
         <input class = "item" type="checkbox" id="ftParenthesis">
-        <label class = "item" for="ftParenthesis"><aNoBold>Include parenthesis</aNoBold></label>
+        <label class = "item" for="ftParenthesis"><a>Include parenthesis</a></label>
         <aRight title="Enabled:  (asimilar conocimientos)&#013;Disabled: asimilar conocimientos">&nbsp;&nbsp;(?)</aRight><br>
         <hr>
         <a>Native translation</a>
         <aRight title="comer    ingerir, tragar    {eat}&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;(?)</aRight>
         <br>
         <input class = "item" type="checkbox" id="ntTooltips">
-        <label class = "item" for="ntTooltips"><aNoBold>Include grammar abbreviations</aNoBold></label>
+        <label class = "item" for="ntTooltips"><a>Include grammar abbreviations</a></label>
         <aRight title="Enabled:  look into vi phrasal&#013;          &#09;consider, evaluate vtr&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
 
         <input class = "item" type="checkbox" id="ntSameRow">
-        <label class = "item" for="ntSameRow"><aNoBold>Force onto single row</aNoBold></label>
+        <label class = "item" for="ntSameRow"><a>Force onto single row</a></label>
         <aRight title="Enabled:  look into, consider, evaluate&#013;Disabled: look into&#013;          &#09;consider, evaluate">&nbsp;&nbsp;(?)</aRight><br>
         <hr>
         <a>Helper native translation</a>
         <aRight title="comer    ingerir, tragar    {(food)} eat&#013;&#09;&#09;Hay que comer verduras.&#013;&#09;&#09;You need to eat vegetables.">&nbsp;(?)</aRight>
         <br>
         <input class = "item" type="checkbox" id="hntEnabled">
-        <label class = "item" for="hntEnabled"><aNoBold>Include (if exists) when copying native translation</aNoBold></label>
+        <label class = "item" for="hntEnabled"><a>Include (if exists) when copying native translation</a></label>
         <aRight title="Enabled:  (action) do&#013;Disabled:  do">&nbsp;&nbsp;(?)</aRight><br>
 
         <input class = "item" type="checkbox" id="hntParenthesis">
-        <label class = "item" for="hntParenthesis"><aNoBold>Include parenthesis</aNoBold></label>
+        <label class = "item" for="hntParenthesis"><a>Include parenthesis</a></label>
         <aRight title="Enabled:  (action) do&#013;Disabled: action do">&nbsp;&nbsp;(?)</aRight><br>
 
+    </div>
+    <div id="misc" class="tabcontent">
+        <aRed>[1] </aRed>
+        <aWithOutline>In order for clicking to reveal text to work properly, go to</aWithOutline>
+        <a href="https://www.wordreference.com/2012/preferences.aspx" target="_blank"> WordReference's preferences</a>
+        <aWithOutline>and ensure "click on word" is set to "does nothing."</aWithOutline>
+        <br>
+        <aRed>[2] </aRed>
+        <aWithOutline>Changing the settings for "Reveal hidden text" requires a page reload.</aWithOutline>
+        <br>
+        <aRed>[3] </aRed>
+        <aWithOutline>Changing the settings for "Hide text as" requires a page reload.</aWithOutline>
+        <br>
+        <aRed>[4] </aRed>
+        <aWithOutline>The "Generate definite articles" for foreign definition only works for Spanish, French, Italian and Portuguese; support for more languages coming in the future.
+            Articles are generated from the respective grammar abbreviations (e.g. nm, nf).
+            It cannot account for irregular words, so use with caution.</aWithOutline>
+        <button class="small2" id="copyVariables">Copy variables to clipboard</button>
+        <aRight title="When submitting a bug report, knowing the current variables assists with the bug-fixing process.">&nbsp;&nbsp;(?)</aRight><br>
     </div>
     <hr>
     <a href="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ" target="_blank" title="https://www.paypal.com/donate/?hosted_button_id=3LE7TU5QUWDVJ">Donate</a>
