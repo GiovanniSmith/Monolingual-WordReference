@@ -31,10 +31,10 @@ var rowStartIndexesCount = 0;
 var strongIndexes = [];
 var strongIndexesCount = 0;
 var strongRowIndexes = [];
-var nativeExampleSentenceIndexes = [];
-var nativeExampleSentenceIndexesCount;
-var nativeExampleSentenceRowIndexes = [];
-var nativeExampleSentenceRowIndexesCount;
+var foreignSentenceIndexes = [];
+var foreignSentenceIndexesCount;
+var foreignSentenceRowIndexes = [];
+var foreignSentenceRowIndexesCount;
 var notePublRowIndexes = [];
 var notePublRowTouchingStrongIndexes = [];
 var findNearestRowStartIndex = 0;
@@ -189,7 +189,7 @@ function addArticles(text, textWithoutTooltips, language) {
       return addArticlesPortuguese(text, textWithoutTooltips, language);
 	  break;
       default:
-      return "Error in addArticles(): languageCombination of " + language + "was not found.";
+      return "Error in addArticles(): languageCombination of " + language + " was not found.";
     }
 }
 function startsWithVowel(text) {
@@ -827,9 +827,9 @@ function restoreDefinitions() {
 try {
 	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {
-			nativeExampleSentenceRowIndexes.push(k);
+			foreignSentenceRowIndexes.push(k);
 		} else {
-			nativeExampleSentenceRowIndexes.push(-1);
+			foreignSentenceRowIndexes.push(-1);
 		}
 		if (tableRow[k].outerHTML.includes("<td>")) {
 			tableRowIndexes.push(k);
@@ -863,8 +863,8 @@ try {
 		}
 	}
 	strongRowIndexes.shift();
-	nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToNegativeOne);
-    nativeExampleSentenceRowIndexes = nativeExampleSentenceRowIndexes.filter(notEqualToZero);
+	foreignSentenceRowIndexes = foreignSentenceRowIndexes.filter(notEqualToNegativeOne);
+    foreignSentenceRowIndexes = foreignSentenceRowIndexes.filter(notEqualToZero);
     notePublRowIndexes.shift();
     isSomethingImportantMissingRowIndexes.shift();
     if (rowStartIndexes[0] == 0 && rowStartIndexes[1] == 0)
@@ -908,9 +908,9 @@ try {
 			strongIndexes.push(-1);
 		}
 		if (tableData[k].outerHTML.includes("FrEx")) {
-			nativeExampleSentenceIndexes.push(k);
+			foreignSentenceIndexes.push(k);
 		} else {
-			nativeExampleSentenceIndexes.push(-1);
+			foreignSentenceIndexes.push(-1);
 		}
 	}
 	//console.log("headerRowIndexes before shift: " + headerRowIndexes);
@@ -924,8 +924,8 @@ try {
 		strongIndexes.shift();
 	}
 	strongIndexes = strongIndexes.filter(notEqualToNegativeOne);
-	nativeExampleSentenceIndexes = nativeExampleSentenceIndexes.filter(notEqualToNegativeOne);
-	nativeExampleSentenceIndexes.shift();
+	foreignSentenceIndexes = foreignSentenceIndexes.filter(notEqualToNegativeOne);
+	foreignSentenceIndexes.shift();
 	exampleSentenceRowIndexes.shift();
 
 	// add an additional row to account for "is something missing" sentence
@@ -935,7 +935,7 @@ try {
 	console.log("notePublRowTouchingStrongIndexes: " + notePublRowTouchingStrongIndexes);
 	console.log("notePublRowIndexes: " + notePublRowIndexes);
 	console.log("strongRowIndexes: " + strongRowIndexes);
-	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
+	console.log("foreignSentenceRowIndexes: " + foreignSentenceRowIndexes);
 	console.log("tableRowIndexes: " + tableRowIndexes);
 	console.log("tableRowIndexes.length: " + tableRowIndexes.length);
 	console.log("rowDataStartIndexes: " + rowDataStartIndexes);
@@ -943,12 +943,12 @@ try {
 	console.log("strongIndexes: " + strongIndexes);
 	console.log("strongIndexes.length: " + strongIndexes.length);
 	console.log("FrEx.length: " + FrEx.length);
-	console.log("nativeExampleSentenceIndexes: " + nativeExampleSentenceIndexes);
-	console.log("nativeExampleSentenceIndexes.length: " + nativeExampleSentenceIndexes.length);
+	console.log("foreignSentenceIndexes: " + foreignSentenceIndexes);
+	console.log("foreignSentenceIndexes.length: " + foreignSentenceIndexes.length);
 	console.log("rowStartIndexes: " + rowStartIndexes);
 	console.log("rowStartIndexes.length: " + rowStartIndexes.length);
-	console.log("nativeExampleSentenceRowIndexes: " + nativeExampleSentenceRowIndexes);
-	console.log("nativeExampleSentenceRowIndexes.length: " + nativeExampleSentenceRowIndexes.length);
+	console.log("foreignSentenceRowIndexes: " + foreignSentenceRowIndexes);
+	console.log("foreignSentenceRowIndexes.length: " + foreignSentenceRowIndexes.length);
 	console.log("headerRowIndexes: " + headerRowIndexes);
 
 	var foreignDefinitions = [], foreignDefinitionsNoTooltip = [],
@@ -971,7 +971,7 @@ try {
 //			console.log("(2.5)#" + tableRow[k].outerHTML.split("<span class=\"dsense\">")[1].split("</td>")[0].replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 			helperNativeTranslationsRowIndexes.push(k);
 		}
-		if (tableRow[k].outerHTML.includes("<td class=\"ToWrd\">") && !tableRow[k].outerHTML.includes("langHeader")) {
+		if ((tableRow[k].outerHTML.includes("<td class=\"ToWrd\">") || tableRow[k].outerHTML.includes("<td class=\"ToWrd\" "))&& !tableRow[k].outerHTML.includes("langHeader")) {
 //			console.log("(3)  " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
 //			console.log("(3)# " + tableRow[k].outerHTML.split("<td class=\"ToWrd\">")[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
 			nativeTranslationsRowIndexes.push(k);
@@ -979,11 +979,13 @@ try {
 		if (tableRow[k].outerHTML.includes("class=\"FrEx\">")) {
 //			console.log("(4)  " + tableRow[k].outerHTML.split("<span dir=\"ltr\">")[1].split("</span>")[0]);
 		}
-		if (tableRow[k].outerHTML.includes("class=\"ToEx\">")) {
+		if (tableRow[k].outerHTML.includes("class=\"ToEx\">") || tableRow[k].outerHTML.includes("class=\"ToEx Ar\">")) {
 //			console.log("(5)  " + tableRow[k].outerHTML.split("<i>")[1].split("</i>")[0].replace( /(<([^>]+)>)/ig, ''));
 			nativeSentencesRowIndexes.push(k);
 		}
 	}
+    console.log("nativeSentencesRowIndexes: " + nativeSentencesRowIndexes);
+    console.log("nativeTranslationsRowIndexes: " + nativeTranslationsRowIndexes);
 
 	// copy button
 	for (let k = rowStartIndexes[1]; k <= tableRowIndexes[tableRowIndexes.length-1]; k++) {
@@ -1078,7 +1080,7 @@ try {
 				var currentFsRows = [];
 				var currentFsRow = currentFdRow;
 				for (let i = k; i < rowStartIndexes[rowStartIndexes.length-1] + 10; i++) {
-					if (nativeExampleSentenceRowIndexes.includes(currentFsRow)) {
+					if (foreignSentenceRowIndexes.includes(currentFsRow)) {
 						currentFsRows.push(currentFsRow);
 					}
 					currentFsRow++;
@@ -1159,30 +1161,37 @@ try {
 								var fdWithoutTooltipsWithCap = capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
 								var fdWithoutTooltipsNoCap = tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
 
+                                var fdWithoutTooltipsWithCap2 = capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
+                                var fdWithoutTooltipsNoCap2 = addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2));
+
 								if (fdTooltips == true) {
 									if (fdCapitalize == true)
-										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap, languageCombinationInPage.substring(0, 2)));
+										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap2, languageCombinationInPage.substring(0, 2)));
 									else
-										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap, languageCombinationInPage.substring(0, 2));
+										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap2, languageCombinationInPage.substring(0, 2));
 								} else {
 									if (fdCapitalize == true)
-										clipboardHoldText += fdWithoutTooltipsWithCap;
+										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap, languageCombinationInPage.substring(0, 2)));
 									else
-										clipboardHoldText += fdWithoutTooltipsNoCap;
+										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap, languageCombinationInPage.substring(0, 2));
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 								clipboardHoldText += "\n";
 							} else if (idOrder[i] == "ft") {
+							    var cutOffLength = 5;
+							    if (languageCombinationInPage == "enar:")
+							        cutOffLength = 17;
+
 								if (ftParenthesis == true) {
 									if (ftCapitalize == true)
-										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
+										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(cutOffLength).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, ''));
 									else
-										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '');
+										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(cutOffLength).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '');
 								} else {
 									if (ftCapitalize == true)
-										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
+										clipboardHoldText += capitalizeFirstLetter((tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(cutOffLength).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', ''));
 									else
-										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(5).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
+										clipboardHoldText += (tableRow[currentFtRow].outerHTML.split("</td>")[1].substring(cutOffLength).split(")")[0] + ")").replace( /(<([^>]+)>)/ig, '').replace('(', '').replace(')', '');
 								}
                                 clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
                                 clipboardHoldText += "\n";
@@ -1194,6 +1203,7 @@ try {
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 							} else if (idOrder[i] == "nt") {
 							    var rForHnt = 0;
+							    console.log("currentNtRows.length: " + currentNtRows.length);
 								for (let r = 0; r < currentNtRows.length; r++) {
 									var currentTableRow = tableRow[currentNtRows[r]].outerHTML;
 									console.log("currentNtRows[r]: " + currentNtRows[r]);
@@ -1211,9 +1221,10 @@ try {
 										rForHnt++;
 									}
 									var splitWithThis;
-                                    // <td class="ToWrd" onclick="this.innerHTML='
                                     if (removeAttributesV2(currentTableRow).includes("<td class=\"ToWrd\" onclick=\"this.innerHTML=\'"))
                                         splitWithThis = "<td class=\"ToWrd\" onclick=\"this.innerHTML=\'";
+                                    else if (currentTableRow.includes("<td class=\"ToWrd\" dir=\"rtl\">"))
+                                        splitWithThis = "<td class=\"ToWrd\" dir=\"rtl\">";
                                     else
                                         splitWithThis = "<td class=\"ToWrd\">";
 
@@ -1253,8 +1264,7 @@ try {
 							} else if (idOrder[i] == "ns" && nsExists) {
 								for (let r = 0; r < currentNsRows.length; r++) {
 									var currentTableRow = tableRow[currentNsRows[r]].outerHTML;
-									//console.log(currentTableRow);
-									clipboardHoldText += removeBackslashBeforeApostrophe((removeAttributesV2(currentTableRow).split("><i>")[1].split("</tr>")[0].replace( /(<([^>]+)>)/ig, '')).replace("&quot;", "").replace("&quot;", "").replace("&quot;", "").replace("&quot;", "")) + "\n";
+                                    clipboardHoldText += removeBackslashBeforeApostrophe((removeAttributesV2(currentTableRow).split("><i>")[1].split("</tr>")[0].replace( /(<([^>]+)>)/ig, '')).replace("&quot;", "").replace("&quot;", "").replace("&quot;", "").replace("&quot;", "")) + "\n";
 								}
 							} else if (idOrder[i] == "b1" || idOrder[i] == "b2" || idOrder[i] == "b3" || idOrder[i] == "b4" || idOrder[i] == "b5")
 								clipboardHoldText += "\n";
