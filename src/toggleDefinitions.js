@@ -559,6 +559,9 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 		chrome.storage.local.set({toggleCopy: false}, function() {});
 		copyStatus = true;
 	}
+    headerWord = document.querySelector(".headerWord");
+    var copyHeaderWordButton = createCopyHeaderWordButton();
+    headerWord.insertAdjacentHTML('afterend', copyHeaderWordButton);
 
 	if (copyStatus == true) {
 		document.getElementById("copyHeaderWord").style.visibility = "visible";
@@ -703,10 +706,27 @@ chrome.runtime.onMessage.addListener(
 				}
 			}
 		}
+
+		if (copyStatus == true) {
+            document.getElementById("copyHeaderWord").style.visibility = "visible";
+            document.getElementById("copyHeaderWordSpace").style.visibility = "visible";
+            copyHeaderWord.onclick = async function(e) {
+                console.log("Copy header word button clicked");
+                if (capitalize == true)
+                    clipboardHoldText = capitalizeFirstLetter(headerWord.outerHTML.replace( /(<([^>]+)>)/ig, ''));
+                else
+                    clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
+                console.log("capitalize: " + capitalize);
+                console.log("Text copied:\n" + clipboardHoldText);
+                navigator.clipboard.writeText(clipboardHoldText);
+            }
+          } else {
+            document.getElementById("copyHeaderWord").style.visibility = "hidden";
+            document.getElementById("copyHeaderWordSpace").style.visibility = "hidden";
+          }
+
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
-
-
 
 	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
 	  	'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
@@ -747,10 +767,6 @@ try {
 	ph = document.getElementsByClassName("ph");
 	notePubl = document.getElementsByClassName("notePubl");
 	isSomethingImportantMissing = document.getElementsByClassName("even more");
-
-	headerWord = document.querySelector(".headerWord");
-	var copyHeaderWordButton = createCopyHeaderWordButton();
-	headerWord.insertAdjacentHTML('afterend', copyHeaderWordButton);
 
 	for (i = 0; i < ToWrd.length; i++) {
 		if (!ToWrd[i].innerHTML.includes("sLang_")) {
@@ -1062,8 +1078,7 @@ try {
 					definitionOnlyTakesUpOneRow = false;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3)) {
 						// if there is a note on this row, store it and put it back when the button goes away
-						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>" ||
-                            tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.includes("sNext100")) {
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {
 							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML;
 						} else {
 							htmlThatButtonRemoved = "";

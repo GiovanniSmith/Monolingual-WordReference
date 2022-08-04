@@ -1,4 +1,4 @@
-const version = "0.0.9";
+const version = "1.0.0";
 // tab stuff
 function openTab(evt, cityName) {
   // Declare all variables
