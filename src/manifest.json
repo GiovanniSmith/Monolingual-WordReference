@@ -3,15 +3,15 @@
 
   "name": "Monolingual WordReference",
   "description": "Hides native language text in WordReference, along with other tweaks.",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "icons": {
-    "16": "WordReference Logo 16x PNG.png",
-    "48": "WordReference Logo 48x PNG.png",
-    "128": "WordReference Logo 128x PNG.png"
+    "16": "MWR logo PNG.png",
+    "48": "MWR logo PNG.png",
+    "128": "MWR logo PNG.png"
   },
 
   "action": {
-    "default_icon": "WordReference Logo 48x PNG.png",
+    "default_icon": "MWR logo PNG.png",
     "default_popup": "default.html",
     "persistent": true
   },

@@ -149,6 +149,14 @@ function isLetter(str) {// https://stackoverflow.com/a/9862788
   return str.length === 1 && str.match(/[a-z]/i);
 }
 
+function removeCopyAtEnd(text) {
+    if (text.length >= 4 && text.substring(text.length-4) == "Copy") {
+        return text.substring(0, text.length-4);
+    } else {
+        return text;
+    }
+}
+
 function capitalizeFirstLetter(text) {
 	var returnThis;
 	if (text.length > 1) {
@@ -173,6 +181,13 @@ chrome.storage.local.get(['radio1', 'radio2'], function(variable) {
 });
 
 function addArticles(text, textWithoutTooltips, language) {
+    text = removeCopyAtEnd(text);
+    textWithoutTooltips = removeCopyAtEnd(textWithoutTooltips);
+
+    console.log("text: " + text);
+    console.log("textWithoutTooltips: " + textWithoutTooltips);
+    console.log("language: " + language);
+
 	switch(language) {
 	  case "en":// why is Portuguese here instead of returning the variable "text"? WordReference is a scuffed site, and I'm lazy
 	  return addArticlesPortuguese(text, textWithoutTooltips, language);
@@ -200,25 +215,45 @@ function startsWithConsonant(text) {
 	return !startsWithVowel(text);
 }
 function addArticlesHelper(text, partToCutOff, article, language) {
-	console.log("text: " + text);
-	console.log("partToCutOff: " + partToCutOff);
+	console.log("partToCutOff length: " + partToCutOff);
 	console.log("article: " + article);
 	text = text.substring(0, text.length-partToCutOff);
 
-	// https://stackoverflow.com/a/881111
+
 	var textAddToThis = "";
+	// https://stackoverflow.com/a/881111
 	for (let i = 0; i <= (text.match(/,/g) || []).length; i++) {
-		if ((article == "le" || article == "la") && startsWithVowel(text.split(", ")[i]) && language == "fr")// french
+	    if (language == "es" && (text.split(", ")[i].substring(0, 3) == "el " || text.split(", ")[i].substring(0, 3) == "la "
+	                || text.split(", ")[i].substring(0, 4) == "los " || text.split(", ")[i].substring(0, 4) == "las ")) {
+            if (article == "el")
+                textAddToThis += "el " + text.split(", ")[i].substring(3) + ", ";
+            if (article == "la")
+                textAddToThis += "la " + text.split(", ")[i].substring(3) + ", ";
+            if (article == "los")
+                textAddToThis += "los " + text.split(", ")[i].substring(4) + ", ";
+            if (article == "las")
+                textAddToThis += "las " + text.split(", ")[i].substring(4) + ", ";
+        } else if (language == "fr" && (text.split(", ")[i].substring(0, 3) == "le " || text.split(", ")[i].substring(0, 3) == "la "
+                    || text.split(", ")[i].substring(0, 4) == "les " || text.split(", ")[i].substring(0, 4) == "las ")) {
+            if (article == "le")
+                textAddToThis += "le " + text.split(", ")[i].substring(3) + ", ";
+            if (article == "la")
+                textAddToThis += "la " + text.split(", ")[i].substring(3) + ", ";
+            if (article == "les")
+                textAddToThis += "les " + text.split(", ")[i].substring(4) + ", ";
+            if (article == "las")
+                textAddToThis += "las " + text.split(", ")[i].substring(4) + ", ";
+        } else if (language == "fr" && (article == "le" || article == "la") && startsWithVowel(text.split(", ")[i]))// french
 			textAddToThis += "l'" + text.split(", ")[i] + ", ";
-		else if ((text.split(", ")[i].substring(0, 2) == "gn" || text.split(", ")[i].substring(0, 2) == "ps" ||
+		else if (language == "it" && (text.split(", ")[i].substring(0, 2) == "gn" || text.split(", ")[i].substring(0, 2) == "ps" ||
 			text.split(", ")[i].substring(0, 2) == "pn" || text.split(", ")[i].substring(0, 1) == "x" ||
 			text.split(", ")[i].substring(0, 1) == "y" || text.split(", ")[i].substring(0, 1) == "z" ||
-			(text.split(", ")[i].substring(0, 1) == "s" && startsWithVowel(text.split(", ")[i].substring(1, 2)))) && language == "it") {// italian
+			(text.split(", ")[i].substring(0, 1) == "s" && startsWithVowel(text.split(", ")[i].substring(1, 2))))) {// italian
 			if (article == "il")
 				textAddToThis += "lo " + text.split(", ")[i] + ", ";
 			else if (article == "i")
 				textAddToThis += "gli " + text.split(", ")[i] + ", ";
-		} else if (startsWithConsonant(text) && language == "it") {// italian
+		} else if (language == "it" && startsWithConsonant(text)) {// italian
 			if (article == "il")
 				textAddToThis += "il " + text.split(", ")[i] + ", ";
 			if (article == "la")
@@ -227,7 +262,7 @@ function addArticlesHelper(text, partToCutOff, article, language) {
 				textAddToThis += "i " + text.split(", ")[i] + ", ";
 			if (article == "le")
 				textAddToThis += "le " + text.split(", ")[i] + ", ";
-		} else if (startsWithVowel(text) && language == "it") {// italian
+		} else if (language == "it" && startsWithVowel(text)) {// italian
 			if (article == "il")
 				textAddToThis += "l'" + text.split(", ")[i] + ", ";
 			if (article == "i")
@@ -240,12 +275,7 @@ function addArticlesHelper(text, partToCutOff, article, language) {
 			textAddToThis += article + " " + text.split(", ")[i] + ", ";// default
 	}
 
-	if (textAddToThis.substring(3, 6) == "el " && language == "es")// if text = la buena mesa
-		return textAddToThis.substring(3, textAddToThis.length-2);
-	else if (textAddToThis.substring(3, 6) == "la " && language == "es")// or of the sort
-		return textAddToThis.substring(3, textAddToThis.length-2);
-	else
-		return textAddToThis.substring(0, textAddToThis.length-2);
+    return textAddToThis.substring(0, textAddToThis.length-2);
 }
 
 function addArticlesSpanish(text, textWithoutTooltips, language) {
@@ -259,9 +289,6 @@ function addArticlesSpanish(text, textWithoutTooltips, language) {
 	var masc = "m";
 	var fem = "f";
 
-	if (text.substring(text.length-4) == "Copy") {
-		text = text.substring(0, text.length-4);
-	}
 	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
 		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
@@ -298,8 +325,6 @@ function addArticlesSpanish(text, textWithoutTooltips, language) {
 		return addArticlesHelper(text, 12, mascDefArt, language);
 	} else if (text.substring(text.length-12) == " n" + fem + " + adj " + masc + fem) {
 		return addArticlesHelper(text, 12, femDefArt, language);
-	}  else if (text.substring(text.length-10) == " grupo nom") {
-		return addArticlesHelper(text, 10, mascDefArt, language);
 	} else {
 		return textWithoutTooltips;
 	}
@@ -323,9 +348,6 @@ function addArticlesFrench(text, textWithoutTooltips, language) {
 	var masc = "m";
 	var fem = "f";
 
-	if (text.substring(text.length-4) == "Copy") {
-		text = text.substring(0, text.length-4);
-	}
 	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
 		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
@@ -376,8 +398,12 @@ function addArticlesFrench(text, textWithoutTooltips, language) {
 		return addArticlesHelper(text, 7, mascDefArt, language);
 	} else if (text.substring(text.length-7) == " nf inv") {
         return addArticlesHelper(text, 7, femDefArt, language);
+    } else if (text.substring(text.length-10) == " nm propre") {
+        return addArticlesHelper(text, 10, mascDefArt, language);
+    } else if (text.substring(text.length-10) == " nf propre") {
+        return addArticlesHelper(text, 10, femDefArt, language);
     } else {
-		return textWithoutTooltips;
+        return textWithoutTooltips;
 	}
 }
 function addArticlesItalian(text, textWithoutTooltips, language) {
@@ -405,9 +431,6 @@ function addArticlesItalian(text, textWithoutTooltips, language) {
 	var masc = "m";
 	var fem = "f";
 
-	if (text.substring(text.length-4) == "Copy") {
-		text = text.substring(0, text.length-4);
-	}
 	if (text.substring(text.length-7) == " " + mascAbbrv + ", " + femAbbrv) {
 		text = text.substring(0, text.length-7);
 		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
@@ -469,9 +492,6 @@ function addArticlesPortuguese(text, textWithoutTooltips, language) {
 	var masc = "m";
 	var fem = "f";
 
-	if (text.substring(text.length-4) == "Copy") {
-		text = text.substring(0, text.length-4);
-	}
 	if (text.substring(text.length-4) == " s" + masc + fem) {
 		text = text.substring(0, text.length-4);
 		return mascDefArt + " " + text.split(", ")[0] + ", " + femDefArt + " " + text.split(", ")[1];
@@ -550,7 +570,7 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 			else
 				clipboardHoldText = headerWord.outerHTML.replace( /(<([^>]+)>)/ig, '');
 			console.log("capitalize: " + capitalize);
-			console.log("Text copied: " + clipboardHoldText);
+			console.log("Text copied:\n" + clipboardHoldText);
 			navigator.clipboard.writeText(clipboardHoldText);
 		}
 	  } else {
@@ -1009,11 +1029,12 @@ try {
 				}
 				// first row of definition
 				if (tableRow[k].outerHTML.includes(languageCombinationInPage)) {
-					console.log("First row: " + k);
+					console.log("Row: " + k);
 					onFirstRow = true;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3)) {
 						// if there is a note on this row, store it and put it back when the button goes away
-						if (tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>" ||
+						    tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.includes("sNext100")) {
 							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML;
 						} else {
 							htmlThatButtonRemoved = "";
@@ -1036,12 +1057,13 @@ try {
 					rowStartIndexesCount = 0;
 					copyButtonExists = true;
 				} else {// subsequent rows of definition
-					console.log("Subsequent row: " + k);
+					console.log("Row: " + k);
 					onFirstRow = false;
 					definitionOnlyTakesUpOneRow = false;
 					if (!(currentRowTheCopyButtonIsOn == strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3)) {
 						// if there is a note on this row, store it and put it back when the button goes away
-						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>") {
+						if (tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML.substring(0, 3) === "<i>" ||
+                            tableData[strongIndexes[rowStartIndexes.indexOf(k)-1 + headerRowOffsetCount] + 3].innerHTML.includes("sNext100")) {
 							htmlThatButtonRemoved = tableData[strongIndexes[rowStartIndexes.indexOf(k-rowStartIndexesCount)-1 + headerRowOffsetCount] + 3].innerHTML;
 						} else {
 							htmlThatButtonRemoved = "";
@@ -1151,29 +1173,25 @@ try {
 					ntCapitalize = variable.ntCapitalize;
                 });
 
-				console.log("languageCombinationInPage: " + languageCombinationInPage);
 				var noTextWasCollected = false;
 				var clipboardHoldText = "";
 				for (let i = 0; i < idOrder.length; i++) {
 					for (let j = 0; j < idWhichTrue.length; j++) {
 						if (idOrder[i].includes(idWhichTrue[j])) {
 							if (idOrder[i] == "fd") {
-								var fdWithoutTooltipsWithCap = capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
-								var fdWithoutTooltipsNoCap = tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
-
-                                var fdWithoutTooltipsWithCap2 = capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2)));
-                                var fdWithoutTooltipsNoCap2 = addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), languageCombinationInPage.substring(0, 2));
+							    var fdNoAbbr = tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
+                                var fdWithAbbr = tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', '');
 
 								if (fdTooltips == true) {
 									if (fdCapitalize == true)
-										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap2, languageCombinationInPage.substring(0, 2)));
+										clipboardHoldText += capitalizeFirstLetter(addArticles(fdWithAbbr, fdNoAbbr, languageCombinationInPage.substring(0, 2)));
 									else
-										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<td class=\"FrWrd\">")[1].split("</td>")[0].split("<i>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap2, languageCombinationInPage.substring(0, 2));
+										clipboardHoldText += addArticles(fdWithAbbr, fdNoAbbr, languageCombinationInPage.substring(0, 2));
 								} else {
 									if (fdCapitalize == true)
-										clipboardHoldText += capitalizeFirstLetter(addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsWithCap, languageCombinationInPage.substring(0, 2)));
+										clipboardHoldText += capitalizeFirstLetter(fdNoAbbr);
 									else
-										clipboardHoldText += addArticles(tableRow[currentFdRow].outerHTML.split("<strong>")[1].split("</strong>")[0].replace( /(<([^>]+)>)/ig, '').replace('⇒', ''), fdWithoutTooltipsNoCap, languageCombinationInPage.substring(0, 2));
+										clipboardHoldText += fdNoAbbr;
 								}
 								clipboardHoldText = removeBackslashBeforeApostrophe(clipboardHoldText);
 								clipboardHoldText += "\n";

@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bfede036-dc94-4040-9878-8d5f683f2949" name="Changes" comment="Changed HTML of popup window">
+      <change afterPath="$PROJECT_DIR$/src/MWR logo PNG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/MWR logo SVG.svg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordReference Logo 128x PNG.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordReference Logo 16x PNG.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/WordReference Logo 48x PNG.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/default.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/default.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/manifest.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/toggleDefinitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/toggleDefinitions.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
