@@ -617,11 +617,10 @@ chrome.storage.local.get(['toggleDefinitions', 'toggleCopy', 'fdStatus', 'b1Stat
 
 	console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 });
-chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+chrome.storage.local.get(['capitalize', 'fdTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
 							'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
 	capitalize = variable.capitalize;
 	fdTooltips = variable.fdTooltips;
-	ntTooltips = variable.ntTooltips;
 	hntParenthesis = variable.hntParenthesis;
 	ftParenthesis = variable.ftParenthesis;
 	ntSameRow = variable.ntSameRow;
@@ -650,7 +649,8 @@ function removeAttributesV3(text) {
 	text = text.replace(" " + hoverOrClickAttributeName + "=\"this.innerHTML=\'", ">");
 	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'" + hideTextPlaceholder + "\'\" style=\"text-align:right\">" + hideTextPlaceholder, "");
 	text = text.replace("&quot;", "\"");
-	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'" + hideTextPlaceholder + "\';\">" + hideTextPlaceholder, "")
+	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'" + hideTextPlaceholder + "\';\">" + hideTextPlaceholder, "");
+	text = text.split("\';\" onmouseleave=\"this.innerHTML=\'")[0] + text.split("\';\" style=\"text-align:right\">(<i>formal</i>)")[1];
 	return text;
 }
 
@@ -728,11 +728,10 @@ chrome.runtime.onMessage.addListener(
 	  });
 	  console.log("idWhichTrue: " + idWhichTrue + "\nidOrder: " + idOrder);
 
-	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+	  chrome.storage.local.get(['capitalize', 'fdTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
 	  	'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
       	capitalize = variable.capitalize;
       	fdTooltips = variable.fdTooltips;
-      	ntTooltips = variable.ntTooltips;
       	hntParenthesis = variable.hntParenthesis;
       	ftParenthesis = variable.ftParenthesis;
       	ntSameRow = variable.ntSameRow;
@@ -1172,11 +1171,10 @@ try {
 				}
 				console.log("currentHntRows: " + currentHntRows);
 
-				chrome.storage.local.get(['capitalize', 'fdTooltips', 'ntTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
+				chrome.storage.local.get(['capitalize', 'fdTooltips', 'hntEnabled', 'hntParenthesis', 'ftParenthesis', 'ntSameRow', 'hntEnabled',
 										'fdCapitalize', 'ftCapitalize', 'ntCapitalize'], function(variable) {
 					capitalize = variable.capitalize;
 					fdTooltips = variable.fdTooltips;
-					ntTooltips = variable.ntTooltips;
 					hntEnabled = variable.hntEnabled;
 					hntParenthesis = variable.hntParenthesis;
 					ftParenthesis = variable.ftParenthesis;
@@ -1262,30 +1260,16 @@ try {
                                         splitWithThis = "<td class=\"ToWrd\">";
 
 									if (ntSameRow == true) {
-										if (ntTooltips == true) {
-											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
-											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
-										} else {
-											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
-											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
-										}
+                                        if (ntCapitalize)
+                                            clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+                                        else
+                                            clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split(" <em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										clipboardHoldText += ", ";
 									} else {
-										if (ntTooltips == true) {
-											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join(""));
-											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].replace( /(<([^>]+)>)/ig, '').split("⇒").join("");
-										} else {
-											if (ntCapitalize)
-												clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
-											else
-												clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
-										}
+                                        if (ntCapitalize)
+                                            clipboardHoldText += capitalizeFirstLetter(removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, ''));
+                                        else
+                                            clipboardHoldText += removeAttributesV2(currentTableRow).split(splitWithThis)[1].split("<em class")[0].split("⇒").join("").replace( /(<([^>]+)>)/ig, '');
 										clipboardHoldText += "\n";
 									}
 								}

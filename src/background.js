@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	const capitalize = document.getElementById('capitalize');
     const fdTooltips = document.getElementById('fdTooltips');
-    const ntTooltips = document.getElementById('ntTooltips');
     const hntParenthesis = document.getElementById('hntParenthesis');
     const ftParenthesis = document.getElementById('ftParenthesis');
     const ntSameRow = document.getElementById('ntSameRow');
@@ -95,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	chrome.storage.local.get(['fdStatus', 'b1Status', 'ftStatus', 'b2Status', 'ntStatus', 'b3Status', 'fsStatus',
 				'b4Status', 'nsStatus', 'b5Status', 'currentHTML', 'dontShowAgain', 'hasDOMeverBeenLoaded', 'firstTime',
-				'fdTooltips', 'ntTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
+				'fdTooltips', 'hntParenthesis', 'ftParenthesis', 'ntSameRow',
 				'hntEnabled', 'radio1', 'radio2', 'click', 'hover', 'capitalize',
 				'fdCapitalize', 'ftCapitalize', 'ntCapitalize', 'toggleDefinitions', 'toggleCopy'], function(variable) {
 		if (variable.hasDOMeverBeenLoaded == true)
@@ -149,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		document.getElementById("capitalize").checked = variable.capitalize;
 		document.getElementById("fdTooltips").checked = variable.fdTooltips;
-		document.getElementById("ntTooltips").checked = variable.ntTooltips;
 		document.getElementById("hntEnabled").checked = variable.hntEnabled;
 		document.getElementById("hntParenthesis").checked = variable.hntParenthesis;
 		document.getElementById("ftParenthesis").checked = variable.ftParenthesis;
@@ -181,7 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                           "\nntCapitalize: " + variable.ntCapitalize +
                                           "\ncapitalize: " + variable.capitalize +
                                           "\nfdTooltips: " + variable.fdTooltips +
-                                          "\nntTooltips: " + variable.ntTooltips +
                                           "\nhntEnabled: " + variable.hntEnabled +
                                           "\nftParenthesis: " + variable.ftParenthesis +
                                           "\nntSameRow: " + variable.ntSameRow +
@@ -461,17 +458,6 @@ document.querySelector('body').addEventListener('click', function(event) {
 				chrome.storage.local.set({fdTooltips: fdTooltips.checked}, function() {});
 				console.log("fdTooltips: " + fdTooltips.checked);
 				chrome.tabs.sendMessage(tabs[0].id, {fdTooltips: variable.fdTooltips}, function(response) {});
-			});
-		});
-	}
-	ntTooltips.onclick = async function(e) {
-		let queryOptions = { active: true, currentWindow: true };
-		let tab = await chrome.tabs.query(queryOptions);
-		chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
-			chrome.storage.local.get(['ntTooltips'], function(variable) {
-				chrome.storage.local.set({ntTooltips: ntTooltips.checked}, function() {});
-				console.log("ntTooltips: " + ntTooltips.checked);
-				chrome.tabs.sendMessage(tabs[0].id, {ntTooltips: variable.ntTooltips}, function(response) {});
 			});
 		});
 	}
