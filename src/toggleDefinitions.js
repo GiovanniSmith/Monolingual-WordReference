@@ -653,6 +653,11 @@ function removeAttributesV3(text) {
 	text = text.split("\';\" onmouseleave=\"this.innerHTML=\'")[0] + text.split("\';\" style=\"text-align:right\">(<i>formal</i>)")[1];
 	return text;
 }
+function removeAttributesV4(text) {
+	text = text.replace("\';\" onmouseleave=\"this.innerHTML=\'<span dir=ltr\\", "");
+    //';" onmouseleave="this.innerHTML='<span dir=ltr\
+	return text;
+}
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -1281,7 +1286,7 @@ try {
 							} else if (idOrder[i] == "ns" && nsExists) {
 								for (let r = 0; r < currentNsRows.length; r++) {
 									var currentTableRow = tableRow[currentNsRows[r]].outerHTML;
-                                    clipboardHoldText += removeBackslashBeforeApostrophe((removeAttributesV2(currentTableRow).split("><i>")[1].split("</tr>")[0].replace( /(<([^>]+)>)/ig, '')).replace("&quot;", "").replace("&quot;", "").replace("&quot;", "").replace("&quot;", "")) + "\n";
+                                    clipboardHoldText += removeAttributesV4(removeBackslashBeforeApostrophe((removeAttributesV2(currentTableRow).split("><i>")[1].split("</tr>")[0].replace( /(<([^>]+)>)/ig, '')).replace("&quot;", "").replace("&quot;", "").replace("&quot;", "").replace("&quot;", ""))) + "\n";
 								}
 							} else if (idOrder[i] == "b1" || idOrder[i] == "b2" || idOrder[i] == "b3" || idOrder[i] == "b4" || idOrder[i] == "b5")
 								clipboardHoldText += "\n";

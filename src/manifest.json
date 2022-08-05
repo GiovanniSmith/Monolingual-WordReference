@@ -5,13 +5,12 @@
   "description": "Hides native language text in WordReference, along with other tweaks.",
   "version": "1.0.0",
   "icons": {
-    "16": "MWR logo PNG.png",
-    "48": "MWR logo PNG.png",
-    "128": "MWR logo PNG.png"
+    "128": "MWR logo 128x PNG.png",
+    "1000": "MWR logo 1000x PNG.png"
   },
 
   "action": {
-    "default_icon": "MWR logo PNG.png",
+    "default_icon": "MWR logo 128x PNG.png",
     "default_popup": "default.html",
     "persistent": true
   },
