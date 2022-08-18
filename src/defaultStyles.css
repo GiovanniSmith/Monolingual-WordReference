@@ -18,14 +18,14 @@ largeText {
 a {
     color: white;
 	font-family: Cabin;
-	font-size: 10px;
+	font-size: 12px;
 	text-align: center;
 	user-select: none;
 }
 aWithOutline {
     color: white;
 	font-family: Cabin;
-	font-size: 10px;
+	font-size: 12px;
 	text-align: center;
 	user-select: none;
 	text-shadow:
@@ -44,7 +44,7 @@ aRight {
 aRed {
     color: #FFF200;
 	font-family: Cabin;
-	font-size: 10px;
+	font-size: 12px;
 	text-align: center;
 	user-select: none;
 	text-shadow: 0px 1px red;
@@ -277,7 +277,7 @@ body{
 .wrapper .item .text{
   /**font-size: 18px;**/
   /**font-weight: 400;**/
-  font-size: 6px;
+  font-size: 12px;
 }
 .wrapper .item .textSmall{
   font-size: 6px;
