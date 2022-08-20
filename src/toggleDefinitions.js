@@ -89,6 +89,7 @@ var hover;
 
 var hideTextPlaceholder = "[...]";
 
+// 📋 📝
 function createCopyButton(index) {
 	return "<button class=\"blueButton\" id=\"copyButton" + index + "\">Copy</button>";
 }
@@ -865,6 +866,13 @@ function restoreDefinitions() {
 
 
 try {
+    /**
+    var tst = document.createElement("img");
+    tst.src = document.querySelector(".module--images__thumbnails__tile  js-images-link").getAttribute("data-id");
+    tst.setAttribute("width", "50");
+    document.getElementById("articleHead").appendChild(tst);
+    **/
+
 	for (let k = 0; k < tableRow.length; k++) {
 		if (tableRow[k].outerHTML.includes("FrEx")) {
 			foreignSentenceRowIndexes.push(k);

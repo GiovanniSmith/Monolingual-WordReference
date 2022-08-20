@@ -1,4 +1,4 @@
-const version = "1.0.0";
+const version = "1.0.1";
 // tab stuff
 function openTab(evt, cityName) {
   // Declare all variables
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		document.getElementById("radio2").checked = variable.radio2;
 		document.getElementById("click").checked = variable.click;
 		document.getElementById("hover").checked = variable.hover;
-		//saveChanges.click();
+		saveChanges.click();
 
 		copyVariables.onclick = async function(e) {
 		    console.log("Variables copied to clipboard.");

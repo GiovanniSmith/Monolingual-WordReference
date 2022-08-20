@@ -3,7 +3,7 @@
 
   "name": "Monolingual WordReference",
   "description": "Hides native language text in WordReference, along with other tweaks.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icons": {
     "128": "MWR logo 128x PNG.png",
     "1000": "MWR logo 1000x PNG.png"
