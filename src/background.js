@@ -1,4 +1,3 @@
-const version = "1.0.1";
 // tab stuff
 function openTab(evt, cityName) {
   // Declare all variables
@@ -161,8 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 		copyVariables.onclick = async function(e) {
 		    console.log("Variables copied to clipboard.");
-            navigator.clipboard.writeText("v" + version +
-                                          "\ntoggleDefinitions: " + variable.toggleDefinitions +
+            navigator.clipboard.writeText("\ntoggleDefinitions: " + variable.toggleDefinitions +
                                           "\ntoggleCopy: " + variable.toggleCopy +
                                           "\nfdStatus: " + variable.fdStatus +
                                           "\nftStatus: " + variable.ftStatus +
